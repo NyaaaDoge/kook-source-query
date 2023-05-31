@@ -43,10 +43,9 @@ def query_server_results_batch_card_msg(server_info_list: list,
     map_list = load_cached_map_list()
     card_msg = CardMessage()
     card = Card(theme=Types.Theme.INFO)
-    if any(server_info_list):
-        card.append(Module.Header(f"{server_info_list[0].game} 服务器查询"))
-        card.append(Module.Divider())
-    for server_info in server_info_list[:12]:
+    card.append(Module.Header(f"服务器查询结果"))
+    card.append(Module.Divider())
+    for server_info in server_info_list[:15]:
         server_player_info = f"{server_info.player_count} / {server_info.max_players}"
         if isinstance(server_info.ping, float):
             server_ping = f"{round(server_info.ping * 1000)} ms"

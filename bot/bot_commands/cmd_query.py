@@ -61,11 +61,14 @@ def reg_query_cmd(bot: Bot):
             ip_to_query_list = []
             server_info_list = []
             show_ip_flag = False
+            show_img_flag = True
             if db_info:
                 for row in db_info:
                     db_channel = sqlite3_channel.DatabaseChannel(*row)
                     if db_channel.show_ip == 1:
                         show_ip_flag = True
+                    if db_channel.show_img == 0:
+                        show_img_flag = False
                     ip_to_query_list.append(db_channel.ip_subscription)
             if any(ip_to_query_list):
                 for ip in ip_to_query_list:
@@ -77,14 +80,14 @@ def reg_query_cmd(bot: Bot):
                     server_info_list.append(server_info)
                 try:
                     # 使用多服务器卡片消息
-                    card_msg = query_server_results_batch_card_msg(server_info_list, map_img=True,
+                    card_msg = query_server_results_batch_card_msg(server_info_list, map_img=show_img_flag,
                                                                    show_ip=show_ip_flag)
                     await msg.reply(type=MessageTypes.CARD, content=card_msg)
                 except HTTPRequester.APIRequestFailed as failed:
                     try:
                         # 如果遇到 40000 代码再创建不发送图片的任务。如果是卡片消息创建失败，首先尝试发送没有图片的卡片消息。
                         if failed.err_code == 40000:
-                            card_msg = query_server_results_batch_card_msg(server_info_list, map_img=False,
+                            card_msg = query_server_results_batch_card_msg(server_info_list, map_img=show_img_flag,
                                                                            show_ip=show_ip_flag)
                             await msg.reply(type=MessageTypes.CARD, content=card_msg)
                     except Exception as e:

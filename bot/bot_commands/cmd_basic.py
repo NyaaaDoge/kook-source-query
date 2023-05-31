@@ -25,6 +25,7 @@ def reg_basic_cmd(bot: Bot):
 `/config query [ip地址:端口号]` - 为当前频道设置添加要查询的IP地址
 `/config delete [ip地址:端口号]` - 删除设置里面当前频道对应的IP地址
 `/config showip [on/off]` - 为当前频道的查询设置显示/关闭IP地址结果
+`/config showimg [on/off]` - 为当前频道的查询设置显示/关闭预览图片，关闭图片后可以有效提高查询速度。
 `/config` - 查看当前频道查询的设置信息和当前服务器的设置信息
 """)
 

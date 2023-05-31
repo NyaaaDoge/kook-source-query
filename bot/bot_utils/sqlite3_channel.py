@@ -21,6 +21,7 @@ class DatabaseChannel(object):
     sub_time: str
     ip_subscription: str
     show_ip: int
+    show_img: int
 
 
 class KookChannelSql(object):
@@ -49,7 +50,8 @@ class KookChannelSql(object):
     channel_name    text,
     sub_time        text,
     ip_subscription text,
-    show_ip         integer default 0
+    show_ip         integer default 0,
+    show_img         integer default 1
 );''')
         except sqlite3.OperationalError:
             pass
@@ -71,8 +73,9 @@ class KookChannelSql(object):
                                   channel.name,
                                   insert_time,
                                   ip_addr,
-                                  0)
-                conn.execute(f"insert into kook_channel values (NULL,?,?,?,?,?,?)", insert_content)
+                                  0,
+                                  1)
+                conn.execute(f"insert into kook_channel values (NULL,?,?,?,?,?,?,?)", insert_content)
                 conn.commit()
                 logger.debug(f"channel({channel.id}:{channel.name}) insert info table successfully.")
                 return True
@@ -95,6 +98,17 @@ class KookChannelSql(object):
             logger.debug(f"Updating channel show ip flag by {channel_id}...")
             with self.conn() as conn:
                 result = conn.execute(f"update kook_channel set show_ip = ? "
+                                      f"where channel_id = ?", (flag, channel_id))
+                conn.commit()
+                return result.rowcount
+        except Exception as e:
+            logger.exception(e, exc_info=True)
+
+    def update_channel_show_img_option(self, flag, channel_id):
+        try:
+            logger.debug(f"Updating channel show ip flag by {channel_id}...")
+            with self.conn() as conn:
+                result = conn.execute(f"update kook_channel set show_img = ? "
                                       f"where channel_id = ?", (flag, channel_id))
                 conn.commit()
                 return result.rowcount

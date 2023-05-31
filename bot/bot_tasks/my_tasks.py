@@ -11,7 +11,7 @@ task_logger = BotLogger(logger)
 
 def register_tasks(bot: Bot):
     # 更新地图图片列表
-    @bot.task.add_interval(hours=1)
+    @bot.task.add_interval(hours=3)
     async def update_map_img_list():
         try:
             await task_update_map_list_json()

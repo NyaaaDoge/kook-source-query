@@ -1,8 +1,7 @@
 import logging
 from bot.bot_utils import utils_log
 from bot.bot_configs import config_global
-from khl import Bot, Message, MessageTypes, HTTPRequester
-from bot.bot_cards_message.cards_msg_server import query_server_result_card_msg
+from khl import Bot, Message
 from bot.bot_utils.utils_bot import BotUtils
 from bot.bot_utils import sqlite3_channel
 
@@ -45,8 +44,10 @@ def reg_channel_cmd(bot: Bot):
                                                           f"{db_info.ip_subscription}")
                         current_guild_desc = "\n".join(current_guild_sub_list)
 
-                        await msg.reply(f"(ins)**当前频道设置信息({len(current_chan_sub_list)})：**(ins)\n{current_chan_desc}\n"
-                                        f"(ins)**当前服务器设置信息({len(current_guild_sub_list)})：**(ins)\n{current_guild_desc}")
+                        await msg.reply(f"(ins)**当前频道设置信息({len(current_chan_sub_list)})：**(ins)"
+                                        f"\n{current_chan_desc}\n"
+                                        f"(ins)**当前服务器设置信息({len(current_guild_sub_list)})：**(ins)"
+                                        f"\n{current_guild_desc}")
 
                     else:
                         await msg.reply("当前频道没有设置任何IP地址")
@@ -60,6 +61,10 @@ def reg_channel_cmd(bot: Bot):
                     # 符合IP地址，端口格式
                     elif BotUtils.validate_ip_port(args[0]):
                         chan_sql = sqlite3_channel.KookChannelSql()
+                        db_guild_info_list = chan_sql.get_all_sub_ip_by_guild_id(current_guild.id)
+                        saved_max_number = global_settings.guild_server_query_max_number
+                        if len(db_guild_info_list) > saved_max_number:
+                            await msg.reply(f":green_square: 服务器查询({args[0]}) 添加失败，当前服务器配置IP大于{saved_max_number}。")
                         insert_flag = chan_sql.insert_channel_ip_sub(current_channel, args[0])
                         if insert_flag:
                             await msg.reply(f":green_square: 服务器查询({args[0]}) 添加成功")
@@ -102,7 +107,31 @@ def reg_channel_cmd(bot: Bot):
                         else:
                             await msg.reply(f":red_square: 关闭频道IP地址显示失败，请联系管理员")
 
+                elif command in ["showimg"]:
+                    if not any(args):
+                        await msg.reply("`/config showimg on`\n 开启查询结果图片显示"
+                                        "`/config showimg off` 关闭查询结果图片显示")
+                        return
+
+                    elif args[0] in ['on']:
+                        chan_sql = sqlite3_channel.KookChannelSql()
+                        update_flag = chan_sql.update_channel_show_img_option(1, current_channel_id)
+                        if update_flag:
+                            await msg.reply(f":green_square: 开启频道图片显示成功")
+                        else:
+                            await msg.reply(f":red_square: 开启频道图片显示失败，请联系管理员")
+
+                    elif args[0] in ['off']:
+                        chan_sql = sqlite3_channel.KookChannelSql()
+                        update_flag = chan_sql.update_channel_show_img_option(0, current_channel_id)
+                        if update_flag:
+                            await msg.reply(f":green_square: 关闭频道图片显示成功")
+                        else:
+                            await msg.reply(f":red_square: 关闭频道图片显示失败，请联系管理员")
+
             except Exception as e:
                 logging.exception(e, exc_info=True)
                 await msg.reply("发生了一些未知错误，请联系开发者解决。")
 
+        else:
+            await msg.reply("您没有对应的管理权限。配置频道IP地址查询需要您的权限有：服务器管理员，频道管理员。")
