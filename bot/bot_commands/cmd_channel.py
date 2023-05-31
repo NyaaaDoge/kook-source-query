@@ -28,8 +28,28 @@ def reg_channel_cmd(bot: Bot):
         if perm:
             try:
                 if not command:
-                    await msg.reply("`/config query [IP地址:端口号]` - 为当前频道保存查询的服务器地址", type=MessageTypes.KMD)
-                    return
+                    chan_sql = sqlite3_channel.KookChannelSql()
+                    db_info_list = chan_sql.get_all_sub_ip_by_channel_id(current_channel_id)
+                    guild_info_list = chan_sql.get_all_sub_ip_by_guild_id(current_guild.id)
+                    current_chan_sub_list = []
+                    current_guild_sub_list = []
+                    if any(db_info_list):
+                        for row in db_info_list:
+                            db_info = sqlite3_channel.DatabaseChannel(*row)
+                            current_chan_sub_list.append(db_info.ip_subscription)
+                        current_chan_desc = "\n".join(current_chan_sub_list)
+
+                        for row in guild_info_list:
+                            db_info = sqlite3_channel.DatabaseChannel(*row)
+                            current_guild_sub_list.append(f"(chn){db_info.channel_id}(chn) 设置了 "
+                                                          f"{db_info.ip_subscription}")
+                        current_guild_desc = "\n".join(current_guild_sub_list)
+
+                        await msg.reply(f"(ins)**当前频道设置信息({len(current_chan_sub_list)})：**(ins)\n{current_chan_desc}\n"
+                                        f"(ins)**当前服务器设置信息({len(current_guild_sub_list)})：**(ins)\n{current_guild_desc}")
+
+                    else:
+                        await msg.reply("当前频道没有设置任何IP地址")
 
                 if command in ["query"]:
                     if not any(args):
@@ -41,9 +61,45 @@ def reg_channel_cmd(bot: Bot):
                         chan_sql = sqlite3_channel.KookChannelSql()
                         insert_flag = chan_sql.insert_channel_ip_sub(current_channel, args[0])
                         if insert_flag:
-                            await msg.reply(f":green_square: 服务器查询({args[0]}) 插入成功")
+                            await msg.reply(f":green_square: 服务器查询({args[0]}) 添加成功")
                         else:
-                            await msg.reply(f":red_square: 服务器查询({args[0]}) 插入失败，请联系管理员")
+                            await msg.reply(f":red_square: 服务器查询({args[0]}) 添加失败，可能是由于该地址已经添加过。")
+
+                elif command in ["delete"]:
+                    if not any(args):
+                        await msg.reply("""/config delete [IP地址:端口号] :red_square: 缺少所需参数：[IP地址:端口号]""")
+                        return
+
+                    # 符合IP地址，端口格式
+                    elif BotUtils.validate_ip_port(args[0]):
+                        chan_sql = sqlite3_channel.KookChannelSql()
+                        delete_result = chan_sql.delete_channel_ip_sub_by_ip(current_channel_id, args[0])
+                        if delete_result:
+                            await msg.reply(f":green_square: 服务器查询({args[0]}) 删除成功")
+                        else:
+                            await msg.reply(f":red_square: 服务器查询({args[0]}) 删除失败，请联系管理员")
+
+                elif command in ["showip"]:
+                    if not any(args):
+                        await msg.reply("`/config showip on`\n 开启查询结果IP地址显示"
+                                        "`/config showip off` 关闭查询结果IP地址显示")
+                        return
+
+                    elif args[0] in ['on']:
+                        chan_sql = sqlite3_channel.KookChannelSql()
+                        update_flag = chan_sql.update_channel_show_ip_option(1, current_channel_id)
+                        if update_flag:
+                            await msg.reply(f":green_square: 开启频道IP地址显示成功")
+                        else:
+                            await msg.reply(f":red_square: 开启频道IP地址显示失败，请联系管理员")
+
+                    elif args[0] in ['off']:
+                        chan_sql = sqlite3_channel.KookChannelSql()
+                        update_flag = chan_sql.update_channel_show_ip_option(0, current_channel_id)
+                        if update_flag:
+                            await msg.reply(f":green_square: 关闭频道IP地址显示成功")
+                        else:
+                            await msg.reply(f":red_square: 关闭频道IP地址显示失败，请联系管理员")
 
             except Exception as e:
                 logging.exception(e, exc_info=True)

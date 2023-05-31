@@ -35,16 +35,17 @@ def reg_query_cmd(bot: Bot):
                     address = (spilt_res[0], int(spilt_res[1]))
                     try:
                         server_info = a2s.info(address, timeout=global_settings.source_server_query_timeout)
+                        server_info.ip_addr = ip_addr
                         try:
                             # 首次发送先尝试发送图片
-                            card_msg = query_server_result_card_msg(ip_addr, server_info, map_img=True)
+                            card_msg = query_server_result_card_msg(server_info, map_img=True)
                             await msg.reply(type=MessageTypes.CARD, content=card_msg)
                         except HTTPRequester.APIRequestFailed as failed:
                             try:
                                 logger.info(f"failed to send map img. Sending info without img...")
                                 # 如果遇到 40000 代码再创建不发送图片的任务。如果是卡片消息创建失败，首先尝试发送没有图片的卡片消息。
                                 if failed.err_code == 40000:
-                                    card_msg = query_server_result_card_msg(ip_addr, server_info, map_img=False)
+                                    card_msg = query_server_result_card_msg(server_info, map_img=False)
                                     await msg.reply(type=MessageTypes.CARD, content=card_msg)
                             except Exception as e:
                                 logger.exception(f"exception {e}")
@@ -59,9 +60,12 @@ def reg_query_cmd(bot: Bot):
             db_info = chan_sql.get_all_sub_ip_by_channel_id(current_channel_id)
             ip_to_query_list = []
             server_info_list = []
+            show_ip_flag = False
             if db_info:
                 for row in db_info:
                     db_channel = sqlite3_channel.DatabaseChannel(*row)
+                    if db_channel.show_ip == 1:
+                        show_ip_flag = True
                     ip_to_query_list.append(db_channel.ip_subscription)
             if any(ip_to_query_list):
                 for ip in ip_to_query_list:
@@ -69,16 +73,19 @@ def reg_query_cmd(bot: Bot):
                     spilt_res = ip.split(":")
                     address = (spilt_res[0], int(spilt_res[1]))
                     server_info = a2s.info(address, timeout=global_settings.source_server_query_timeout)
+                    server_info.ip_addr = ip
                     server_info_list.append(server_info)
                 try:
                     # 使用多服务器卡片消息
-                    card_msg = query_server_results_batch_card_msg(server_info_list, map_img=True)
+                    card_msg = query_server_results_batch_card_msg(server_info_list, map_img=True,
+                                                                   show_ip=show_ip_flag)
                     await msg.reply(type=MessageTypes.CARD, content=card_msg)
                 except HTTPRequester.APIRequestFailed as failed:
                     try:
                         # 如果遇到 40000 代码再创建不发送图片的任务。如果是卡片消息创建失败，首先尝试发送没有图片的卡片消息。
                         if failed.err_code == 40000:
-                            card_msg = query_server_results_batch_card_msg(server_info_list, map_img=False)
+                            card_msg = query_server_results_batch_card_msg(server_info_list, map_img=False,
+                                                                           show_ip=show_ip_flag)
                             await msg.reply(type=MessageTypes.CARD, content=card_msg)
                     except Exception as e:
                         logger.exception(f"exception {e}")

@@ -59,6 +59,12 @@ class KookChannelSql(object):
     def insert_channel_ip_sub(self, channel: PublicChannel, ip_addr: str):
         try:
             with self.conn() as conn:
+                is_db_exist = conn.execute(f"select * from kook_channel "
+                                           f"where channel_id = ? and ip_subscription = ?",
+                                           (channel.id, ip_addr)).fetchall()
+                if any(is_db_exist):
+                    logger.info(f"{channel.id, ip_addr} already existed.")
+                    return False
                 insert_time = time.strftime('%Y-%m-%dT%H:%M:%S')
                 insert_content = (channel.guild_id,
                                   channel.id,
@@ -74,11 +80,43 @@ class KookChannelSql(object):
             logger.exception(e, exc_info=True)
             return False
 
+    def delete_channel_ip_sub_by_ip(self, channel_id, ip_addr):
+        try:
+            logger.debug(f"Deleting row by {channel_id}, {ip_addr}...")
+            with self.conn() as conn:
+                result = conn.execute(f"delete from kook_channel where channel_id = ? and ip_subscription = ?",
+                                      (channel_id, ip_addr))
+                return result.rowcount
+        except Exception as e:
+            logger.exception(e, exc_info=True)
+
+    def update_channel_show_ip_option(self, flag, channel_id):
+        try:
+            logger.debug(f"Updating channel show ip flag by {channel_id}...")
+            with self.conn() as conn:
+                result = conn.execute(f"update kook_channel set show_ip = ? "
+                                      f"where channel_id = ?", (flag, channel_id))
+                conn.commit()
+                return result.rowcount
+        except Exception as e:
+            logger.exception(e, exc_info=True)
+
     def get_all_sub_ip_by_channel_id(self, channel_id):
         try:
             logger.debug(f"Query info by{channel_id}.")
             with self.conn() as conn:
-                result = conn.execute(f"select * from kook_channel where channel_id = ?", (channel_id,)).fetchall()
+                result = conn.execute(f"select distinct * from kook_channel "
+                                      f"where channel_id = ?", (channel_id,)).fetchall()
                 return result
         except Exception as e:
-            logger.exception(e)
+            logger.exception(e, exc_info=True)
+
+    def get_all_sub_ip_by_guild_id(self, guild_id):
+        try:
+            logger.debug(f"Query info by{guild_id}.")
+            with self.conn() as conn:
+                result = conn.execute(f"select distinct * from kook_channel "
+                                      f"where guild_id = ?", (guild_id,)).fetchall()
+                return result
+        except Exception as e:
+            logger.exception(e, exc_info=True)

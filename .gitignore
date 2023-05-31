@@ -141,3 +141,5 @@ cython_debug/
 /data/
 /logs/
 /bot/test/
+/bot/bot_configs/config_bot.py
+/bot/bot_configs/config_global.py

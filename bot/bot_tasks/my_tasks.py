@@ -1,11 +1,8 @@
 import logging
-import re
-import aiohttp
-from khl import Bot, Message, MessageTypes
+from khl import Bot
 from bot.bot_apis import map_img
 from bot.bot_utils.utils_log import BotLogger
 from bot.bot_configs import config_bot
-from bot.bot_utils import sqlite3_channel, sqlite3_map_imgs
 
 bot_settings = config_bot.settings
 logger = logging.getLogger(__name__)
