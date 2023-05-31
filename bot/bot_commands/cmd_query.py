@@ -18,14 +18,14 @@ def reg_query_cmd(bot: Bot):
     async def query(msg: Message, command: str = None, *args):
         cmd_query_logger.logging_msg(msg)
         if not command:
-            await msg.reply("用法：`/query ip [ip地址:端口号]` - 查询特定IP的服务器信息\n"
+            await msg.reply("用法：\n`/query ip [ip地址:端口号]` - 查询特定IP的服务器信息\n"
                             "`/query server` - 查询当前频道配置好的服务器信息", type=MessageTypes.KMD)
             return
 
         elif command in ['ip']:
             if not any(args):
                 await msg.reply("用法：`/query ip [ip地址:端口号]` - 查询特定IP的服务器信息\n"
-                                "举例：`query ip 216.52.148.47:27015`", type=MessageTypes.KMD)
+                                "举例：`/query ip 216.52.148.47:27015`", type=MessageTypes.KMD)
                 return
 
             elif len(args) == 1:

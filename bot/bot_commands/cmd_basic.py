@@ -16,6 +16,18 @@ def reg_basic_cmd(bot: Bot):
         cmd_logger.logging_msg(msg)
         await msg.reply("有什么想查的服务器？")
 
+    @bot.command(name="help", case_sensitive=False)
+    async def cmd_help(msg: Message):
+        cmd_logger.logging_msg(msg)
+        await msg.reply(f"""{global_settings.BOT_VERSION} 帮助文档：
+`/query ip [ip地址:端口号]` - 查询特定IP地址的起源/金源服务器信息
+`/query server` - 查询该频道设置好的IP地址列表的服务器信息
+`/config query [ip地址:端口号]` - 为当前频道设置添加要查询的IP地址
+`/config delete [ip地址:端口号]` - 删除设置里面当前频道对应的IP地址
+`/config showip [on/off]` - 为当前频道的查询设置显示/关闭IP地址结果
+`/config` - 查看当前频道查询的设置信息和当前服务器的设置信息
+""")
+
     @bot.command(name='admin')
     async def admin(msg: Message, command: str = None, *args):
         cmd_logger.logging_msg(msg)

@@ -53,7 +53,8 @@ def reg_channel_cmd(bot: Bot):
 
                 if command in ["query"]:
                     if not any(args):
-                        await msg.reply("""/config query [IP地址:端口号] :red_square: 缺少所需参数：[IP地址:端口号]""")
+                        await msg.reply("/config query [IP地址:端口号] :red_square: 缺少所需参数：[IP地址:端口号]。\n"
+                                        "举例：/config query 216.52.148.47:27015")
                         return
 
                     # 符合IP地址，端口格式
