@@ -1,6 +1,6 @@
 import logging
-import a2s
 from bot.bot_utils import utils_log
+from bot.bot_apis.my_query_api import MyQueryApi
 from bot.bot_configs import config_global
 from khl import Bot, Message, MessageTypes, HTTPRequester
 from bot.bot_cards_message.cards_msg_server import query_server_result_card_msg, query_server_results_batch_card_msg
@@ -31,18 +31,16 @@ def reg_query_cmd(bot: Bot):
             elif len(args) == 1:
                 if BotUtils.validate_ip_port(args[0]):
                     ip_addr = args[0]
-                    spilt_res = ip_addr.split(":")
-                    address = (spilt_res[0], int(spilt_res[1]))
                     try:
-                        server_info = a2s.info(address, timeout=global_settings.source_server_query_timeout)
-                        server_info.ip_addr = ip_addr
+                        timeout_glob = global_settings.source_server_query_timeout
+                        server_info = await MyQueryApi().get_server_info(ip_addr, timeout=timeout_glob)
                         try:
                             # 首次发送先尝试发送图片
                             card_msg = query_server_result_card_msg(server_info, map_img=True)
                             await msg.reply(type=MessageTypes.CARD, content=card_msg)
                         except HTTPRequester.APIRequestFailed as failed:
                             try:
-                                logger.info(f"failed to send map img. Sending info without img...")
+                                logger.info(f"Failed to send map img. Sending info without img...")
                                 # 如果遇到 40000 代码再创建不发送图片的任务。如果是卡片消息创建失败，首先尝试发送没有图片的卡片消息。
                                 if failed.err_code == 40000:
                                     card_msg = query_server_result_card_msg(server_info, map_img=False)
@@ -51,6 +49,7 @@ def reg_query_cmd(bot: Bot):
                                 logger.exception(f"exception {e}")
                     except Exception as e:
                         logger.exception(f"exception {e}")
+                        await msg.reply(f"出现了一些问题，可能是服务器通信错误，请稍后再试。")
                 else:
                     await msg.reply("请输入要查询的服务器地址，包括端口号，您可能遗漏了端口号。正确格式：[ip地址:端口号]")
 
@@ -72,11 +71,8 @@ def reg_query_cmd(bot: Bot):
                     ip_to_query_list.append(db_channel.ip_subscription)
             if any(ip_to_query_list):
                 for ip in ip_to_query_list:
-                    logger.info(f"Querying {ip}...")
-                    spilt_res = ip.split(":")
-                    address = (spilt_res[0], int(spilt_res[1]))
-                    server_info = a2s.info(address, timeout=global_settings.source_server_query_timeout)
-                    server_info.ip_addr = ip
+                    timeout_glob = global_settings.source_server_query_timeout
+                    server_info = await MyQueryApi().get_server_info(ip, timeout=timeout_glob)
                     server_info_list.append(server_info)
                 try:
                     # 使用多服务器卡片消息
@@ -92,4 +88,5 @@ def reg_query_cmd(bot: Bot):
                             await msg.reply(type=MessageTypes.CARD, content=card_msg)
                     except Exception as e:
                         logger.exception(f"exception {e}")
+                        await msg.reply(f"出现了一些问题，可能是服务器通信错误，请稍后再试。")
 

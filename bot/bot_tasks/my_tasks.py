@@ -20,9 +20,11 @@ def register_tasks(bot: Bot):
 
 
 async def task_update_map_list_json():
+    logger.info(f"Task updating map list json...")
     try:
         json_data = await map_img.fetch_map_list()
         map_img.cache_map_list(json_data)
     except Exception as e:
         logger.exception(e)
+    logger.info(f"Task updating map list json done.")
 

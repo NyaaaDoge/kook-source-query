@@ -1,4 +1,4 @@
-from khl import Bot, Message
+from khl import Bot
 from bot.bot_commands import cmd_basic, cmd_query, cmd_channel
 
 

@@ -26,7 +26,7 @@ def query_server_result_card_msg(server_info: SourceInfo,
                                                 f"地图：{server_info.map_name}\n"
                                                 f"玩家：{server_player_info}  延迟：{server_ping} :lock:")))
     if show_ip:
-        card.append(Module.Section(Element.Text(f"{server_info.ip_addr}")))
+        card.append(Module.Section(Element.Text(f"{server_info.ip_and_port}")))
     if map_img:
         # 地图图片预览项目地址 https://github.com/NewPage-Community/csgo-map-images
         search_result = search_map(server_info.map_name, map_list)
@@ -62,7 +62,7 @@ def query_server_results_batch_card_msg(server_info_list: list,
                                                     f"地图：{server_info.map_name}\n"
                                                     f"玩家：{server_player_info}  延迟：{server_ping} :lock:")))
         if show_ip:
-            card.append(Module.Section(Element.Text(f"{server_info.ip_addr}")))
+            card.append(Module.Section(Element.Text(f"{server_info.ip_and_port}")))
         if map_img:
             # 地图图片预览项目地址 https://github.com/NewPage-Community/csgo-map-images
             search_result = search_map(server_info.map_name, map_list)
