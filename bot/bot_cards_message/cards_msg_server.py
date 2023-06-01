@@ -11,8 +11,12 @@ def query_server_result_card_msg(server_info: Union[SourceInfo, GoldSrcInfo],
     map_list = load_cached_map_list()
     card_msg = CardMessage()
     card = Card(theme=Types.Theme.INFO)
-    if server_info.server_name is None:
+    if isinstance(server_info, QueryFailInfo):
         card.append(Module.Section(Element.Text(f"{server_info.ip_and_port} 查询失败")))
+        card_msg.append(card)
+        return card_msg
+    elif server_info is None:
+        card.append(Module.Section(Element.Text(f"查询失败\n请确认查询的服务器是起源或者金源游戏服务器。")))
         card_msg.append(card)
         return card_msg
     server_player_info = f"{server_info.player_count} / {server_info.max_players}"
@@ -52,6 +56,8 @@ def query_server_results_batch_card_msg(server_info_list: list,
         if isinstance(server_info, QueryFailInfo):
             card.append(Module.Section(Element.Text(f"{server_info.ip_and_port} 查询失败")))
             continue
+        elif server_info is None:
+            card.append(Module.Section(Element.Text(f"查询失败\n请确认查询的服务器是起源或者金源游戏服务器。")))
         server_player_info = f"{server_info.player_count} / {server_info.max_players}"
         if isinstance(server_info.ping, float):
             server_ping = f"{round(server_info.ping * 1000)} ms"

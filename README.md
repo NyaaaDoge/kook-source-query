@@ -31,16 +31,16 @@ Bot设置了查询`60s`缓存，防止重复查询。
 pip install -r requirements.txt
 ~~~
 在`bot/bot_configs`里面填写对应的Token和开发者ID，然后 python3 main.py运行即可。  
-首次使用需要先更新地图图片JSON数据，可以在运行之后在任一频道使用`/admin update maplist`来更新地图图片JSON数据。
+首次使用需要先更新地图图片JSON数据，可以在运行之后在任一频道使用`/admin update maplist`来更新地图图片JSON数据。  
 
 ### 2. 使用
 
-在需要查询的频道直接使用命令如`/query ip 216.52.148.47:27015`可以直接查询到服务器信息，如果有图片则显示大图。
-需要配置频道默认的查询使用命令如`/config query 216.52.148.47:27015`可以添加到默认查询地址里面。配置完后直接使用`/query server`即可查询到服务器信息。
-如果需要显示/关闭IP地址请使用`/config showip [on/off]`。开启关闭预览图片使用`/config showimg [on/off]`。
+在需要查询的频道直接使用命令如`/query ip 216.52.148.47:27015`可以直接查询到服务器信息，如果有图片则显示大图。  
+需要配置频道默认的查询使用命令如`/config query 216.52.148.47:27015`可以添加到默认查询地址里面。配置完后直接使用`/query server`即可查询到服务器信息。  
+如果需要显示/关闭IP地址请使用`/config showip [on/off]`。开启关闭预览图片使用`/config showimg [on/off]`。  
 
 ## 依赖
 
-* [python-a2s](https://github.com/Yepoleb/python-a2s) - 用于查询起源/金源服务器的库
-* [khl.py](https://github.com/TWT233/khl.py) - Kook社区python机器人框架
-* [csgo-map-images](https://github.com/NewPage-Community/csgo-map-images) - 机器人地图图片图床
+* [python-a2s](https://github.com/Yepoleb/python-a2s) - 用于查询起源/金源服务器的库  
+* [khl.py](https://github.com/TWT233/khl.py) - Kook社区python机器人框架  
+* [csgo-map-images](https://github.com/NewPage-Community/csgo-map-images) - 机器人地图图片图床  

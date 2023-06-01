@@ -12,6 +12,7 @@ logger = logging.getLogger(__name__)
 cmd_query_logger = utils_log.BotLogger(logger)
 cmd_query_logger.create_log_file("cmd_query.log")
 glob_config = config_global.settings
+glob_timeout = glob_config.source_server_query_timeout
 
 # 创建一个带有过期时间的缓存对象，设置过期时间为60秒，最大缓存条目数为200
 cache = TTLCache(maxsize=200, ttl=60)
@@ -25,7 +26,7 @@ class QueryFailInfo(object):
 class MyQueryApi(object):
 
     @staticmethod
-    async def get_server_info(address, timeout=glob_config.source_server_query_timeout) \
+    async def get_server_info(address, timeout=glob_timeout) \
             -> Union[SourceInfo, GoldSrcInfo]:
         if BotUtils.validate_ip_port(address):
             ip_addr = address

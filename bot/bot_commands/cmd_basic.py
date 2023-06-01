@@ -27,7 +27,8 @@ def reg_basic_cmd(bot: Bot):
 `/config showip [on/off]` - 为当前频道的查询设置显示/关闭IP地址结果
 `/config showimg [on/off]` - 为当前频道的查询设置显示/关闭预览图片，关闭图片后可以有效提高查询速度。
 `/config` - 查看当前频道查询的设置信息和当前服务器的设置信息
-[Github项目地址](https://github.com/NyaaaDoge/kook-source-query)
+[Github项目](https://github.com/NyaaaDoge/kook-source-query)
+[预览图片项目](https://newpage-community.github.io/csgo-map-images/)
 """)
 
     @bot.command(name='admin')

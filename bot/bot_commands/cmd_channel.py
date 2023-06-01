@@ -63,8 +63,10 @@ def reg_channel_cmd(bot: Bot):
                         chan_sql = sqlite3_channel.KookChannelSql()
                         db_guild_info_list = chan_sql.get_all_sub_ip_by_guild_id(current_guild.id)
                         saved_max_number = global_settings.guild_server_query_max_number
-                        if len(db_guild_info_list) > saved_max_number:
-                            await msg.reply(f":green_square: 服务器查询({args[0]}) 添加失败，当前服务器配置IP大于{saved_max_number}。")
+                        if len(db_guild_info_list) >= saved_max_number:
+                            await msg.reply(f":green_square: 服务器查询({args[0]}) 添加失败，"
+                                            f"当前服务器配置IP数量大于{saved_max_number}。")
+                            return
                         insert_flag = chan_sql.insert_channel_ip_sub(current_channel, args[0])
                         if insert_flag:
                             await msg.reply(f":green_square: 服务器查询({args[0]}) 添加成功")
