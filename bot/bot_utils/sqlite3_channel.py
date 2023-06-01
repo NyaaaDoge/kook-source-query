@@ -1,5 +1,4 @@
 import logging
-import os
 import sqlite3
 import time
 from dataclasses import dataclass

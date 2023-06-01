@@ -1,6 +1,6 @@
 import logging
 from bot.bot_utils import utils_log
-from bot.bot_apis.my_query_api import MyQueryApi
+from bot.bot_apis.my_query_api import MyQueryApi, QueryFailInfo
 from bot.bot_configs import config_global
 from khl import Bot, Message, MessageTypes, HTTPRequester
 from bot.bot_cards_message.cards_msg_server import query_server_result_card_msg, query_server_results_batch_card_msg
@@ -19,7 +19,8 @@ def reg_query_cmd(bot: Bot):
         cmd_query_logger.logging_msg(msg)
         if not command:
             await msg.reply("用法：\n`/query ip [ip地址:端口号]` - 查询特定IP的服务器信息\n"
-                            "`/query server` - 查询当前频道配置好的服务器信息", type=MessageTypes.KMD)
+                            "`/query server` - 查询当前频道配置好的服务器信息\n"
+                            "举例：`/query ip 216.52.148.47:27015`", type=MessageTypes.KMD)
             return
 
         elif command in ['ip']:
@@ -49,7 +50,7 @@ def reg_query_cmd(bot: Bot):
                                 logger.exception(f"exception {e}")
                     except Exception as e:
                         logger.exception(f"exception {e}")
-                        await msg.reply(f"出现了一些问题，可能是服务器通信错误，请稍后再试。")
+                        await msg.reply(f"出现了一些问题，可能是服务器通信错误，也可能是IP地址有误，请稍后再试。")
                 else:
                     await msg.reply("请输入要查询的服务器地址，包括端口号，您可能遗漏了端口号。正确格式：[ip地址:端口号]")
 
@@ -73,7 +74,10 @@ def reg_query_cmd(bot: Bot):
                 for ip in ip_to_query_list:
                     timeout_glob = global_settings.source_server_query_timeout
                     server_info = await MyQueryApi().get_server_info(ip, timeout=timeout_glob)
-                    server_info_list.append(server_info)
+                    if server_info:
+                        server_info_list.append(server_info)
+                    else:
+                        server_info_list.append(QueryFailInfo(ip))
                 try:
                     # 使用多服务器卡片消息
                     card_msg = query_server_results_batch_card_msg(server_info_list, map_img=show_img_flag,
@@ -88,5 +92,4 @@ def reg_query_cmd(bot: Bot):
                             await msg.reply(type=MessageTypes.CARD, content=card_msg)
                     except Exception as e:
                         logger.exception(f"exception {e}")
-                        await msg.reply(f"出现了一些问题，可能是服务器通信错误，请稍后再试。")
-
+                        await msg.reply(f"出现了一些问题，可能是服务器通信错误，也可能是IP地址有误，请稍后再试。")

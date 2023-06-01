@@ -1,39 +1,42 @@
+import time
+from typing import Union
 from khl.card import CardMessage, Card, Module, Element, Types
-from a2s.info import SourceInfo
+from a2s.info import SourceInfo, GoldSrcInfo
 from bot.bot_apis.map_img import load_cached_map_list, search_map
+from bot.bot_apis.my_query_api import QueryFailInfo
 
 
-def query_server_result_card_msg(server_info: SourceInfo,
+def query_server_result_card_msg(server_info: Union[SourceInfo, GoldSrcInfo],
                                  map_img=True, show_ip=False) -> CardMessage:
     map_list = load_cached_map_list()
     card_msg = CardMessage()
+    card = Card(theme=Types.Theme.INFO)
+    if server_info.server_name is None:
+        card.append(Module.Section(Element.Text(f"{server_info.ip_and_port} 查询失败")))
+        card_msg.append(card)
+        return card_msg
     server_player_info = f"{server_info.player_count} / {server_info.max_players}"
     if isinstance(server_info.ping, float):
         server_ping = f"{round(server_info.ping * 1000)} ms"
     else:
         server_ping = "N/A"
-    card = Card(theme=Types.Theme.INFO)
     card.append(Module.Header(f"{server_info.game} 服务器查询"))
     card.append(Module.Divider())
-    # 没上锁的描述
-    if not server_info.password_protected:
-        card.append(Module.Section(Element.Text(f"(ins)**{server_info.server_name}**(ins)\n"
-                                                f"地图：{server_info.map_name}\n"
-                                                f"玩家：{server_player_info}  延迟：{server_ping}")))
-    # 上锁的描述
-    else:
-        card.append(Module.Section(Element.Text(f"(ins)**{server_info.server_name}**(ins)\n"
-                                                f"地图：{server_info.map_name}\n"
-                                                f"玩家：{server_player_info}  延迟：{server_ping} :lock:")))
+    server_desc = f"(ins)**{server_info.server_name}**(ins)\n" \
+                  f"地图：{server_info.map_name}\n" \
+                  f"玩家：{server_player_info}  延迟：{server_ping}"
+    if server_info.password_protected:
+        server_desc += " :lock:"
     if show_ip:
-        card.append(Module.Section(Element.Text(f"{server_info.ip_and_port}")))
+        server_desc += f"\n{server_info.ip_and_port}"
+    card.append(Module.Section(Element.Text(server_desc)))
     if map_img:
         # 地图图片预览项目地址 https://github.com/NewPage-Community/csgo-map-images
         search_result = search_map(server_info.map_name, map_list)
         if search_result:
             img_src = search_result['medium']
             card.append(Module.Container(Element.Image(src=img_src, circle=False, size=Types.Size.LG)))
-
+    card.append(Module.Context(Element.Text(f"查询于 {time.strftime('%H:%M')}")))
     card_msg.append(card)
     return card_msg
 
@@ -46,28 +49,32 @@ def query_server_results_batch_card_msg(server_info_list: list,
     card.append(Module.Header(f"服务器查询结果"))
     card.append(Module.Divider())
     for server_info in server_info_list[:15]:
+        if isinstance(server_info, QueryFailInfo):
+            card.append(Module.Section(Element.Text(f"{server_info.ip_and_port} 查询失败")))
+            continue
         server_player_info = f"{server_info.player_count} / {server_info.max_players}"
         if isinstance(server_info.ping, float):
             server_ping = f"{round(server_info.ping * 1000)} ms"
         else:
             server_ping = "N/A"
-        # 没上锁的描述
-        if not server_info.password_protected:
-            card.append(Module.Section(Element.Text(f"(ins)**{server_info.server_name}**(ins)\n"
-                                                    f"地图：{server_info.map_name}\n"
-                                                    f"玩家：{server_player_info}  延迟：{server_ping}")))
-        # 上锁的描述
-        else:
-            card.append(Module.Section(Element.Text(f"(ins)**{server_info.server_name}**(ins)\n"
-                                                    f"地图：{server_info.map_name}\n"
-                                                    f"玩家：{server_player_info}  延迟：{server_ping} :lock:")))
+        server_desc = f"(ins)**{server_info.server_name}**(ins)\n" \
+                      f"地图：{server_info.map_name}\n" \
+                      f"玩家：{server_player_info}  延迟：{server_ping}"
+        if server_info.password_protected:
+            server_desc += " :lock:"
         if show_ip:
-            card.append(Module.Section(Element.Text(f"{server_info.ip_and_port}")))
+            server_desc += f"\n{server_info.ip_and_port}"
         if map_img:
             # 地图图片预览项目地址 https://github.com/NewPage-Community/csgo-map-images
             search_result = search_map(server_info.map_name, map_list)
             if search_result:
-                img_src = search_result['medium']
-                card.append(Module.Container(Element.Image(src=img_src, circle=False, size=Types.Size.LG)))
+                card.append(Module.Section(Element.Text(server_desc),
+                                           Element.Image(search_result['thumb'], size=Types.Size.SM),
+                                           Types.SectionMode.RIGHT))
+            else:
+                card.append(Module.Section(Element.Text(server_desc)))
+        else:
+            card.append(Module.Section(Element.Text(server_desc)))
+    card.append(Module.Context(Element.Text(f"查询于 {time.strftime('%H:%M')}")))
     card_msg.append(card)
     return card_msg

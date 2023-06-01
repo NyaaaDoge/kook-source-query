@@ -1,11 +1,12 @@
 import logging
-
 import a2s
+from typing import Union
 from cachetools import TTLCache
 from bot.bot_configs import config_global
 from bot.bot_utils import utils_log
 from bot.bot_utils.utils_bot import BotUtils
-from a2s.info import SourceInfo
+from a2s.info import SourceInfo, GoldSrcInfo
+from dataclasses import dataclass
 
 logger = logging.getLogger(__name__)
 cmd_query_logger = utils_log.BotLogger(logger)
@@ -16,10 +17,16 @@ glob_config = config_global.settings
 cache = TTLCache(maxsize=200, ttl=60)
 
 
+@dataclass()
+class QueryFailInfo(object):
+    ip_and_port: str
+
+
 class MyQueryApi(object):
 
     @staticmethod
-    async def get_server_info(address, timeout=glob_config.source_server_query_timeout) -> SourceInfo:
+    async def get_server_info(address, timeout=glob_config.source_server_query_timeout) \
+            -> Union[SourceInfo, GoldSrcInfo]:
         if BotUtils.validate_ip_port(address):
             ip_addr = address
             spilt_res = ip_addr.split(":")
