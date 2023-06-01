@@ -1,4 +1,5 @@
 import logging
+import aiohttp
 from khl import Bot
 from bot.bot_apis import map_img
 from bot.bot_utils.utils_log import BotLogger
@@ -17,6 +18,15 @@ def register_tasks(bot: Bot):
             await task_update_map_list_json()
         except Exception as e:
             logger.exception(e)
+
+    # 向bm通信
+    if any(bot_settings.bot_market_uuid):
+        @bot.task.add_interval(minutes=30)
+        async def botmarketOnline():
+            botmarket_api = "http://bot.gekj.net/api/v1/online.bot"
+            headers = {'uuid': bot_settings.bot_market_uuid}
+            async with aiohttp.ClientSession() as session:
+                await session.get(botmarket_api, headers=headers)
 
 
 async def task_update_map_list_json():

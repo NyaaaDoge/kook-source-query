@@ -71,9 +71,12 @@ def reg_channel_cmd(bot: Bot):
                         else:
                             await msg.reply(f":red_square: 服务器查询({args[0]}) 添加失败，可能是由于该地址已经添加过。")
 
+                    else:
+                        await msg.reply(f":red_square: 服务器查询({args[0]}) 添加失败，可能是由于该地址不合法。")
+
                 elif command in ["delete"]:
                     if not any(args):
-                        await msg.reply("""/config delete [IP地址:端口号] :red_square: 缺少所需参数：[IP地址:端口号]""")
+                        await msg.reply("/config delete [IP地址:端口号] :red_square: 缺少所需参数：[IP地址:端口号]")
                         return
 
                     # 符合IP地址，端口格式
@@ -85,9 +88,12 @@ def reg_channel_cmd(bot: Bot):
                         else:
                             await msg.reply(f":red_square: 服务器查询({args[0]}) 删除失败，请联系管理员")
 
+                    else:
+                        await msg.reply(f":red_square: 服务器查询({args[0]}) 删除失败，可能是由于该地址不合法。")
+
                 elif command in ["showip"]:
                     if not any(args):
-                        await msg.reply("`/config showip on`\n 开启查询结果IP地址显示"
+                        await msg.reply("`/config showip on` 开启查询结果IP地址显示\n"
                                         "`/config showip off` 关闭查询结果IP地址显示")
                         return
 
@@ -109,7 +115,7 @@ def reg_channel_cmd(bot: Bot):
 
                 elif command in ["showimg"]:
                     if not any(args):
-                        await msg.reply("`/config showimg on`\n 开启查询结果图片显示"
+                        await msg.reply("`/config showimg on`开启查询结果图片显示\n"
                                         "`/config showimg off` 关闭查询结果图片显示")
                         return
 

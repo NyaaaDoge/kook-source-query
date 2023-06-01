@@ -19,7 +19,7 @@ def reg_basic_cmd(bot: Bot):
     @bot.command(name="help", case_sensitive=False)
     async def cmd_help(msg: Message):
         cmd_logger.logging_msg(msg)
-        await msg.reply(f"""{global_settings.BOT_VERSION} 帮助文档：
+        await msg.reply(f"""Sauce Query Bot{global_settings.BOT_VERSION} 帮助文档：
 `/query ip [ip地址:端口号]` - 查询特定IP地址的起源/金源服务器信息
 `/query server` - 查询该频道设置好的IP地址列表的服务器信息
 `/config query [ip地址:端口号]` - 为当前频道设置添加要查询的IP地址
@@ -27,6 +27,7 @@ def reg_basic_cmd(bot: Bot):
 `/config showip [on/off]` - 为当前频道的查询设置显示/关闭IP地址结果
 `/config showimg [on/off]` - 为当前频道的查询设置显示/关闭预览图片，关闭图片后可以有效提高查询速度。
 `/config` - 查看当前频道查询的设置信息和当前服务器的设置信息
+[Github项目地址](https://github.com/NyaaaDoge/kook-source-query)
 """)
 
     @bot.command(name='admin')
@@ -44,6 +45,30 @@ def reg_basic_cmd(bot: Bot):
                     elif args[0] in ['maplist']:
                         await my_tasks.task_update_map_list_json()
                         await msg.reply("执行更新地图列表json完成。", type=MessageTypes.KMD)
+
+                elif command in ['leave']:
+                    if not any(args):
+                        await msg.reply("用法 `.admin leave {gid}`", type=MessageTypes.KMD)
+                        return
+
+                    elif len(args) == 1:
+                        try:
+                            target_guild = await bot.client.fetch_guild(args[0])
+                            await msg.reply(f"获取到Bot加入了此服务器。服务器信息如下：\n"
+                                            f"服务器id: {target_guild.id}\n"
+                                            f"服务器name: {target_guild.name}\n"
+                                            f"服务器master_id: {target_guild.master_id}\n"
+                                            f"您确定要退出该服务器吗？\n"
+                                            f"确定请输入 `.admin leave {target_guild.id} confirm`", type=MessageTypes.KMD)
+
+                        except Exception as e:
+                            logger.exception(e, exc_info=True)
+                            await msg.reply("获取服务器失败，请检查服务器id是否正确。", type=MessageTypes.KMD)
+
+                    elif any(args[0]) and args[1] == "confirm":
+                        target_guild = await bot.client.fetch_guild(args[0])
+                        await target_guild.leave()
+                        await msg.reply("Bot成功退出此服务器！", type=MessageTypes.KMD)
 
             except Exception as e:
                 logging.error(e, exc_info=True)

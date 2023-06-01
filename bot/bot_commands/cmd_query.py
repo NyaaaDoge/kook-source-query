@@ -18,7 +18,7 @@ def reg_query_cmd(bot: Bot):
     async def query(msg: Message, command: str = None, *args):
         cmd_query_logger.logging_msg(msg)
         if not command:
-            await msg.reply("用法：\n`/query ip [ip地址:端口号]` - 查询特定IP的服务器信息\n"
+            await msg.reply("用法：\n`/query ip [ip地址:端口号]` - 查询特定IP的起源/金源游戏服务器信息\n"
                             "`/query server` - 查询当前频道配置好的服务器信息\n"
                             "举例：`/query ip 216.52.148.47:27015`", type=MessageTypes.KMD)
             return
@@ -70,6 +70,9 @@ def reg_query_cmd(bot: Bot):
                     if db_channel.show_img == 0:
                         show_img_flag = False
                     ip_to_query_list.append(db_channel.ip_subscription)
+            else:
+                await msg.reply(f"当前频道尚未配置任何IP地址，请使用`/config query [ip:端口]`进行配置添加。")
+                return
             if any(ip_to_query_list):
                 for ip in ip_to_query_list:
                     timeout_glob = global_settings.source_server_query_timeout
@@ -93,3 +96,8 @@ def reg_query_cmd(bot: Bot):
                     except Exception as e:
                         logger.exception(f"exception {e}")
                         await msg.reply(f"出现了一些问题，可能是服务器通信错误，也可能是IP地址有误，请稍后再试。")
+
+        else:
+            await msg.reply("用法：\n`/query ip [ip地址:端口号]` - 查询特定IP的服务器信息\n"
+                            "`/query server` - 查询当前频道配置好的服务器信息\n"
+                            "举例：`/query ip 216.52.148.47:27015`", type=MessageTypes.KMD)

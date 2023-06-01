@@ -44,7 +44,7 @@ class MyQueryApi(object):
 
                 # 将查询结果添加到缓存中
                 cache[address] = server_info
-
+                logger.info(f"Successfully query {ip_addr}.")
                 return server_info
             except Exception as e:
                 logger.exception(e, exc_info=True)
