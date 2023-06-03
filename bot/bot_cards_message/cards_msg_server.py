@@ -48,7 +48,7 @@ def query_server_result_card_msg(server_info: Union[SourceInfo, GoldSrcInfo],
             card.append(Module.Container(Element.Image(src=img_src, circle=False, size=Types.Size.LG)))
     card.append(Module.Context(Element.Text(f"查询于 {time.strftime('%H:%M')}")))
     card_msg.append(card)
-    logger.debug(f"Return card message for{server_info}")
+    logger.debug(f"Return card message for {server_info}")
     return card_msg
 
 
@@ -91,5 +91,5 @@ def query_server_results_batch_card_msg(server_info_list: list,
             card.append(Module.Section(Element.Text(server_desc)))
     card.append(Module.Context(Element.Text(f"查询于 {time.strftime('%H:%M')}")))
     card_msg.append(card)
-    logger.debug(f"Return card message for{server_info_list}")
+    logger.debug(f"Return card message for {server_info_list}")
     return card_msg

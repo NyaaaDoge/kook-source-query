@@ -133,3 +133,12 @@ class KookChannelSql(object):
                 return result
         except Exception as e:
             logger.exception(e, exc_info=True)
+
+    def get_all_data(self):
+        try:
+            logger.debug(f"Get all rows.")
+            with self.conn() as conn:
+                result = conn.execute(f"select distinct * from kook_channel").fetchall()
+                return result
+        except Exception as e:
+            logger.exception(e, exc_info=True)

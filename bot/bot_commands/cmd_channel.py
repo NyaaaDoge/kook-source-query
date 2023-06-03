@@ -3,6 +3,7 @@ from bot.bot_utils import utils_log
 from bot.bot_configs import config_global
 from khl import Bot, Message
 from bot.bot_utils.utils_bot import BotUtils
+from bot.bot_apis.my_query_api import MyQueryApi
 from bot.bot_utils import sqlite3_channel
 
 global_settings = config_global.settings
@@ -62,19 +63,30 @@ def reg_channel_cmd(bot: Bot):
                     elif BotUtils.validate_ip_port(args[0]):
                         chan_sql = sqlite3_channel.KookChannelSql()
                         db_guild_info_list = chan_sql.get_all_sub_ip_by_guild_id(current_guild.id)
-                        saved_max_number = global_settings.guild_server_query_max_number
-                        if len(db_guild_info_list) >= saved_max_number:
-                            await msg.reply(f":yellow_square: 服务器查询({args[0]}) 添加失败，"
-                                            f"当前服务器配置IP数量大于{saved_max_number}。")
+                        db_chan_info_list = chan_sql.get_all_sub_ip_by_channel_id(current_channel_id)
+                        guild_saved_max_number = global_settings.guild_server_query_max_number
+                        chan_saved_max_number = global_settings.channel_query_max_number
+                        if len(db_guild_info_list) >= guild_saved_max_number:
+                            await msg.reply(f":yellow_square: 服务器查询 ({args[0]}) 添加失败，"
+                                            f"当前**服务器**配置IP数量大于{guild_saved_max_number}。")
+                            return
+                        elif len(db_chan_info_list) >= chan_saved_max_number:
+                            await msg.reply(f":yellow_square: 服务器查询 ({args[0]}) 添加失败，"
+                                            f"当前**频道**配置IP数量大于{chan_saved_max_number}。")
+                            return
+                        ip_addr_to_be_save = await MyQueryApi().get_server_info(args[0])
+                        if not ip_addr_to_be_save:
+                            await msg.reply(f":red_square: 服务器查询 ({args[0]}) 添加失败，"
+                                            f"无法查询该地址对应的游戏服务器信息，有可能是服务器无法通信，也有可能地址错误。")
                             return
                         insert_flag = chan_sql.insert_channel_ip_sub(current_channel, args[0])
                         if insert_flag:
-                            await msg.reply(f":green_square: 服务器查询({args[0]}) 添加成功")
+                            await msg.reply(f":green_square: 服务器查询 ({args[0]}) 添加成功")
                         else:
-                            await msg.reply(f":red_square: 服务器查询({args[0]}) 添加失败，可能是由于该地址已经添加过。")
+                            await msg.reply(f":red_square: 服务器查询 ({args[0]}) 添加失败，可能是由于该地址已经添加过。")
 
                     else:
-                        await msg.reply(f":red_square: 服务器查询({args[0]}) 添加失败，可能是由于该地址不合法。")
+                        await msg.reply(f":red_square: 服务器查询 ({args[0]}) 添加失败，可能是由于该地址不合法。")
 
                 elif command in ["delete"]:
                     if not any(args):
@@ -86,12 +98,12 @@ def reg_channel_cmd(bot: Bot):
                         chan_sql = sqlite3_channel.KookChannelSql()
                         delete_result = chan_sql.delete_channel_ip_sub_by_ip(current_channel_id, args[0])
                         if delete_result:
-                            await msg.reply(f":green_square: 服务器查询({args[0]}) 删除成功")
+                            await msg.reply(f":green_square: 服务器查询 ({args[0]}) 删除成功")
                         else:
-                            await msg.reply(f":red_square: 服务器查询({args[0]}) 删除失败，请联系管理员")
+                            await msg.reply(f":red_square: 服务器查询 ({args[0]}) 删除失败，请联系管理员")
 
                     else:
-                        await msg.reply(f":red_square: 服务器查询({args[0]}) 删除失败，可能是由于该地址不合法。")
+                        await msg.reply(f":red_square: 服务器查询 ({args[0]}) 删除失败，可能是由于该地址不合法。")
 
                 elif command in ["showip"]:
                     if not any(args):

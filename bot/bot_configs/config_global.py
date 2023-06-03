@@ -8,7 +8,8 @@ class GlobalSettings(object):
     bot_guild_black_list: List[str] = []
     bot_developer_list: List[str] = [""]
     source_server_query_timeout: int = 10
-    guild_server_query_max_number: int = 15
+    channel_query_max_number: int = 15
+    guild_server_query_max_number: int = 30
 
 
 settings = GlobalSettings()
