@@ -9,8 +9,8 @@ from a2s.info import SourceInfo, GoldSrcInfo
 from dataclasses import dataclass
 
 logger = logging.getLogger(__name__)
-cmd_query_logger = utils_log.BotLogger(logger)
-cmd_query_logger.create_log_file("cmd_query.log")
+api_query_logger = utils_log.BotLogger(logger)
+api_query_logger.create_log_file("api_query.log")
 glob_config = config_global.settings
 glob_timeout = glob_config.source_server_query_timeout
 

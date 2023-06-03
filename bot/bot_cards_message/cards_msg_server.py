@@ -1,13 +1,19 @@
+import logging
 import time
 from typing import Union
 from khl.card import CardMessage, Card, Module, Element, Types
 from a2s.info import SourceInfo, GoldSrcInfo
 from bot.bot_apis.map_img import load_cached_map_list, search_map
 from bot.bot_apis.my_query_api import QueryFailInfo
+from bot.bot_utils import utils_log
+
+logger = logging.getLogger(__name__)
+card_logger = utils_log.BotLogger(logger)
 
 
 def query_server_result_card_msg(server_info: Union[SourceInfo, GoldSrcInfo],
                                  map_img=True, show_ip=False) -> CardMessage:
+    logger.debug(f"Build card message for{server_info}")
     map_list = load_cached_map_list()
     card_msg = CardMessage()
     card = Card(theme=Types.Theme.INFO)
@@ -42,11 +48,13 @@ def query_server_result_card_msg(server_info: Union[SourceInfo, GoldSrcInfo],
             card.append(Module.Container(Element.Image(src=img_src, circle=False, size=Types.Size.LG)))
     card.append(Module.Context(Element.Text(f"查询于 {time.strftime('%H:%M')}")))
     card_msg.append(card)
+    logger.debug(f"Return card message for{server_info}")
     return card_msg
 
 
 def query_server_results_batch_card_msg(server_info_list: list,
                                         map_img=True, show_ip=False) -> CardMessage:
+    logger.debug(f"Build card message for {server_info_list}")
     map_list = load_cached_map_list()
     card_msg = CardMessage()
     card = Card(theme=Types.Theme.INFO)
@@ -83,4 +91,5 @@ def query_server_results_batch_card_msg(server_info_list: list,
             card.append(Module.Section(Element.Text(server_desc)))
     card.append(Module.Context(Element.Text(f"查询于 {time.strftime('%H:%M')}")))
     card_msg.append(card)
+    logger.debug(f"Return card message for{server_info_list}")
     return card_msg

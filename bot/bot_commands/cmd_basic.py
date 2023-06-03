@@ -27,8 +27,11 @@ def reg_basic_cmd(bot: Bot):
 `/config showip [on/off]` - 为当前频道的查询设置显示/关闭IP地址结果
 `/config showimg [on/off]` - 为当前频道的查询设置显示/关闭预览图片，关闭图片后可以有效提高查询速度。
 `/config` - 查看当前频道查询的设置信息和当前服务器的设置信息
+小技巧：只要在频道发送消息里面有关键字“查”并且@机器人即可查询服务器信息。功能同`/query server`。如`@机器人 查`
 [Github项目](https://github.com/NyaaaDoge/kook-source-query)
-[预览图片项目](https://newpage-community.github.io/csgo-map-images/)
+[预览图片项目](https://newpage-community.github.io/csgo-map-images/)，目前预览图片只有CSGO部分社区地图预览图片。
+觉得不错的话在 [Github页面](https://github.com/NyaaaDoge/kook-source-query) 点个 star 吧！
+或者在 [爱发电](https://afdian.net/a/NyaaaDoge) 支持作者！
 """)
 
     @bot.command(name='admin')
