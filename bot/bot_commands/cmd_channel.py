@@ -13,7 +13,7 @@ cmd_channel_logger.create_log_file("cmd_channel.log")
 
 
 def reg_channel_cmd(bot: Bot):
-    @bot.command(name="config")
+    @bot.command(name="config", case_sensitive=False)
     async def config(msg: Message, command: str = None, *args):
         cmd_channel_logger.logging_msg(msg)
         current_channel_guild_id = msg.ctx.guild.id

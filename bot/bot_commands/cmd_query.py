@@ -15,7 +15,7 @@ cmd_query_logger.create_log_file("cmd_query.log")
 
 
 def reg_query_cmd(bot: Bot):
-    @bot.command(name="query")
+    @bot.command(name="query", case_sensitive=False)
     async def query(msg: Message, command: str = None, *args):
         cmd_query_logger.logging_msg(msg)
         if not command:

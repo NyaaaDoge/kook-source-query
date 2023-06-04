@@ -1,6 +1,8 @@
 import logging
 
+from bot.bot_apis.my_query_api import MyQueryApi
 from bot.bot_configs import config_global
+from bot.bot_utils import sqlite3_channel
 from bot.bot_utils.utils_log import BotLogger
 from bot.bot_tasks import my_tasks
 from khl import Bot, Message, MessageTypes
@@ -42,6 +44,21 @@ def reg_basic_cmd(bot: Bot):
             try:
                 if command is None:
                     await msg.reply("`/admin update maplist`", type=MessageTypes.KMD)
+
+                elif command in ['insert']:
+                    current_channel_id = msg.ctx.channel.id
+                    current_channel = await bot.client.fetch_public_channel(current_channel_id)
+                    chan_sql = sqlite3_channel.KookChannelSql()
+                    ip_addr_to_be_save = await MyQueryApi().get_server_info(args[0])
+                    if not ip_addr_to_be_save:
+                        await msg.reply(f":red_square: 服务器查询 ({args[0]}) 添加失败，"
+                                        f"无法查询该地址对应的游戏服务器信息，有可能是服务器无法通信，也有可能地址错误。")
+                        return
+                    insert_flag = chan_sql.insert_channel_ip_sub(current_channel, args[0])
+                    if insert_flag:
+                        await msg.reply(f":green_square: 服务器查询 ({args[0]}) 添加成功")
+                    else:
+                        await msg.reply(f":red_square: 服务器查询 ({args[0]}) 添加失败，可能是由于该地址已经添加过。")
 
                 elif command in ['update']:
                     if not any(args):
