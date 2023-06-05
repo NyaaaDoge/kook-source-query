@@ -29,6 +29,8 @@ def reg_basic_cmd(bot: Bot):
         await msg.reply(f"""Sauce Query Bot{global_settings.BOT_VERSION} 帮助文档：
 `/query ip [ip地址:端口号]` - 查询特定IP地址的起源/金源服务器信息
 `/query server` - 查询该频道设置好的IP地址列表的服务器信息
+`/query sub [map_name]` - 订阅特定地图，Bot监测到设定好的服务器有特定地图将会私信通知。
+`/query unsub [map_name]` - 取消订阅特定地图。
 `/config query [ip地址:端口号]` - 为当前频道设置添加要查询的IP地址
 `/config delete [ip地址:端口号]` - 删除设置里面当前频道对应的IP地址
 `/config showip [on/off]` - 为当前频道的查询设置显示/关闭IP地址结果

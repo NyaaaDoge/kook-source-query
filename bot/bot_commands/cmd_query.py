@@ -23,7 +23,8 @@ def reg_query_cmd(bot: Bot):
         if not command:
             await msg.reply("用法：\n`/query ip [ip地址:端口号]` - 查询特定IP的起源/金源游戏服务器信息\n"
                             "`/query server` - 查询当前频道配置好的服务器信息。可以使用关键字“查”并且@机器人触发该指令。\n"
-                            "`/query sub [完整地图名] - 订阅特定地图。当管理员设置的监控服务器里面有你订阅的地图名时，Bot将私信通知您。\n`"
+                            "`/query sub [完整地图名]` - 订阅特定地图。当管理员设置的监控服务器里面有你订阅的地图名时，Bot将私信通知您。\n"
+                            "`/query unsub [完整地图名]` - 取消订阅特定地图。"
                             "举例：`/query ip 216.52.148.47:27015`", type=MessageTypes.KMD)
             return
 
@@ -70,8 +71,9 @@ def reg_query_cmd(bot: Bot):
                     db_info = sqlite3_submap.DatabaseUserSub(*row)
                     sub_info.append(db_info.sub_map_name)
                 sub_info_desc = "\n".join(sub_info)
-                await msg.reply("用法：`/query sub [map_name]` - 订阅特定地图，每当监测到该地图进行推送通知。"
-                                "请使用 [模式_地图名] 如 ze_2012_p3, ze_k19_escape_go1 等格式来订阅，需要版本号精确匹配。\n"
+                await msg.reply("用法：`/query sub [map_name]` - 订阅特定地图，每当监测到该地图时会进行私信推送通知。\n"
+                                "`/query unsub [map_name]` - 取消订阅特定地图。\n"
+                                "请使用 [完整地图名] 如 ze_2012_p3, ze_k19_escape_go1 等格式来订阅，需要版本号精确匹配。\n"
                                 "举例：`/query sub ze_2012_p3`\n"
                                 f"**当前订阅地图({len(sub_info)})：**\n{sub_info_desc}", type=MessageTypes.KMD)
                 return
@@ -90,7 +92,7 @@ def reg_query_cmd(bot: Bot):
         elif command in ['unsub']:
             if not any(args):
                 await msg.reply("用法：`/query unsub [map_name]` - 取消订阅特定地图，每当监测到该地图进行推送通知。"
-                                "请使用 [模式_地图名] 如 ze_2012_p3, ze_k19_escape_go1 等格式来订阅，需要版本号精确匹配。\n"
+                                "请使用 [完整地图名] 如 ze_2012_p3, ze_k19_escape_go1 等格式来订阅，需要版本号精确匹配。\n"
                                 "举例：`/query unsub ze_2012_p3`", type=MessageTypes.KMD)
                 return
 

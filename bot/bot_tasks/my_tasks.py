@@ -66,11 +66,11 @@ async def task_track_server_map_info(bot: Bot):
             query_info = await query_api.get_server_info(server.ip_and_port)
             sub_sql.get_all_server_track()
             db_track_info = sub_sql.get_track_info_by_ip_and_port(server.ip_and_port)
-            # 如果当前查询的地图与上次推送的地图名一致，直接跳过
-            if query_info.map_name == db_track_info.last_map_name:
-                continue
             # 无服务器查询信息跳过
             if query_info is None:
+                continue
+            # 如果当前查询的地图与上次推送的地图名一致，直接跳过推送
+            if query_info.map_name == db_track_info.last_map_name:
                 continue
             notify_user_list = user_sub_sql.get_user_list_by_sub_map(query_info.map_name)
             # 无用户订阅地图跳过
@@ -95,12 +95,12 @@ async def task_track_server_map_info(bot: Bot):
                                 await user.send(type=MessageTypes.CARD, content=card_msg)
                         except Exception as e:
                             logger.exception(f"exception {e}")
-                    finally:
-                        sub_sql.update_track_info_by_ip_and_port(server.ip_and_port,
-                                                                 query_info.map_name)
+
                 except Exception as e:
                     logger.exception(f"exception user: {db_user_info.user_id}. {e}")
-
+            # 推送通知完毕修改信息
+            sub_sql.update_track_info_by_ip_and_port(server.ip_and_port,
+                                                     query_info.map_name)
     except Exception as e:
         logger.exception(e)
     logger.info(f"Task tracking server map info done.")

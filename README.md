@@ -13,6 +13,8 @@ Kook Steam 起源/金源 游戏服务查询Bot，支持频道设置批量查询�
 | `/help`                     | 查询帮助指令                               | /                                               |
 | `/query ip [ip:端口]`         | 查询对应IP的服务器信息                         | 举例:`/query ip 216.52.148.47:27015`              |
 | `/query server`             | 查询该频道设置好的IP地址列表的服务器信息                | 需要使用`/config query [ip:端口]`先配置设置                |
+| `/query sub [map_name]`     | 订阅特定地图，Bot监测到设定好的服务器有特定地图将会私信通知。     | 需要Bot管理员手动用`/admin track [ip:port]`设定监测服务器列表    |
+| `/query unsub [map_name]`   | 取消订阅特定地图。                            | /                                               |
 | `/config query [ip地址:端口号]`  | 配置当前频道查询的IP地址                        | /                                               |
 | `/config delete [ip地址:端口号]` | 删除设置里面当前频道对应的IP地址                    | /                                               |
 | `/config showip [on/off]`   | 为当前频道的查询设置显示/关闭IP地址结果                | /                                               |
@@ -22,6 +24,17 @@ Kook Steam 起源/金源 游戏服务查询Bot，支持频道设置批量查询�
 | @机器人+关键词"查"                 | 快捷查询对应IP的服务器信息                       | 只要在频道发送消息里面有关键字“查”并且@机器人即可查询。功能同`/query server` |
 
 Bot设置了查询`60s`缓存，防止重复查询。  
+
+Bot管理员命令：
+
+| 指令（需要在频道输入）                | 功能               | 备注                               |
+|----------------------------|------------------|----------------------------------|
+| `/admin update maplist`    | 更新地图图片JSON数据     | /                                |
+| `/admin update track`      | 手动执行服务器监测任务      | /                                |
+| `/admin insert [ip:port]`  | 直接在当前频道插入配置的查询地址 | /                                |
+| `/admin leave [gid]`       | 离开特定Guild的服务器    | 需要进行二次确认                         |
+| `/admin track [ip:port]`   | 为Bot添加服务器监控列表    | `/admin track`可以查看当前Bot服务器监控配置信息 |
+| `/admin untrack [ip:port]` | 删除服务器监控列表中的特定地址  | /                                |
 
 ## 如何使用？
 
