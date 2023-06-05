@@ -1,7 +1,7 @@
 import logging
 from bot.bot_utils import utils_log
 from bot.bot_configs import config_global
-from khl import Bot, Message
+from khl import Bot, Message, PublicMessage
 from bot.bot_utils.utils_bot import BotUtils
 from bot.bot_apis.my_query_api import MyQueryApi
 from bot.bot_utils import sqlite3_channel
@@ -15,6 +15,8 @@ cmd_channel_logger.create_log_file("cmd_channel.log")
 def reg_channel_cmd(bot: Bot):
     @bot.command(name="config", case_sensitive=False)
     async def config(msg: Message, command: str = None, *args):
+        if not isinstance(msg, PublicMessage):
+            return
         cmd_channel_logger.logging_msg(msg)
         current_channel_guild_id = msg.ctx.guild.id
         current_guild = await bot.client.fetch_guild(current_channel_guild_id)

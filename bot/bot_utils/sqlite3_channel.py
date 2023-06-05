@@ -88,6 +88,7 @@ class KookChannelSql(object):
             with self.conn() as conn:
                 result = conn.execute(f"delete from kook_channel where channel_id = ? and ip_subscription = ?",
                                       (channel_id, ip_addr))
+                conn.commit()
                 conn.execute(f"VACUUM")
                 return result.rowcount
         except Exception as e:

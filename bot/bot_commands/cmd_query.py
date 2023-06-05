@@ -3,10 +3,10 @@ from khl.command import Rule
 from bot.bot_utils import utils_log
 from bot.bot_apis.my_query_api import MyQueryApi, QueryFailInfo
 from bot.bot_configs import config_global
-from khl import Bot, Message, MessageTypes, HTTPRequester
+from khl import Bot, Message, MessageTypes, HTTPRequester, PublicMessage
 from bot.bot_cards_message.cards_msg_server import query_server_result_card_msg, query_server_results_batch_card_msg
 from bot.bot_utils.utils_bot import BotUtils
-from bot.bot_utils import sqlite3_channel
+from bot.bot_utils import sqlite3_channel, sqlite3_submap
 
 global_settings = config_global.settings
 logger = logging.getLogger(__name__)
@@ -17,10 +17,13 @@ cmd_query_logger.create_log_file("cmd_query.log")
 def reg_query_cmd(bot: Bot):
     @bot.command(name="query", case_sensitive=False)
     async def query(msg: Message, command: str = None, *args):
+        if not isinstance(msg, PublicMessage):
+            return
         cmd_query_logger.logging_msg(msg)
         if not command:
             await msg.reply("用法：\n`/query ip [ip地址:端口号]` - 查询特定IP的起源/金源游戏服务器信息\n"
                             "`/query server` - 查询当前频道配置好的服务器信息。可以使用关键字“查”并且@机器人触发该指令。\n"
+                            "`/query sub [完整地图名] - 订阅特定地图。当管理员设置的监控服务器里面有你订阅的地图名时，Bot将私信通知您。\n`"
                             "举例：`/query ip 216.52.148.47:27015`", type=MessageTypes.KMD)
             return
 
@@ -58,6 +61,48 @@ def reg_query_cmd(bot: Bot):
         elif command in ['server']:
             await query_batch(msg)
 
+        elif command in ['sub']:
+            if not any(args):
+                user_sub_sql = sqlite3_submap.KookUserSubSql()
+                user_sub_info_list = user_sub_sql.get_all_user_sub_map_by_user_id(msg.author_id)
+                sub_info = []
+                for row in user_sub_info_list:
+                    db_info = sqlite3_submap.DatabaseUserSub(*row)
+                    sub_info.append(db_info.sub_map_name)
+                sub_info_desc = "\n".join(sub_info)
+                await msg.reply("用法：`/query sub [map_name]` - 订阅特定地图，每当监测到该地图进行推送通知。"
+                                "请使用 [模式_地图名] 如 ze_2012_p3, ze_k19_escape_go1 等格式来订阅，需要版本号精确匹配。\n"
+                                "举例：`/query sub ze_2012_p3`\n"
+                                f"**当前订阅地图({len(sub_info)})：**\n{sub_info_desc}", type=MessageTypes.KMD)
+                return
+
+            elif len(args) == 1:
+                map_name = args[0]
+                current_channel_id = msg.ctx.channel.id
+                current_channel = await bot.client.fetch_public_channel(current_channel_id)
+                sub_sql = sqlite3_submap.KookUserSubSql()
+                insert_flag = sub_sql.insert_user_sub_map(current_channel, msg.author_id, map_name)
+                if insert_flag:
+                    await msg.reply(f":green_square: 地图订阅 ({map_name}) 添加成功")
+                else:
+                    await msg.reply(f":red_square: 地图订阅 ({map_name}) 添加失败，可能是由于地图订阅已经添加过。")
+
+        elif command in ['unsub']:
+            if not any(args):
+                await msg.reply("用法：`/query unsub [map_name]` - 取消订阅特定地图，每当监测到该地图进行推送通知。"
+                                "请使用 [模式_地图名] 如 ze_2012_p3, ze_k19_escape_go1 等格式来订阅，需要版本号精确匹配。\n"
+                                "举例：`/query unsub ze_2012_p3`", type=MessageTypes.KMD)
+                return
+
+            elif len(args) == 1:
+                map_name = args[0]
+                sub_sql = sqlite3_submap.KookUserSubSql()
+                delete_flag = sub_sql.delete_user_sub_map(msg.author_id, map_name)
+                if delete_flag:
+                    await msg.reply(f":green_square: 地图订阅 ({args[0]}) 删除成功")
+                else:
+                    await msg.reply(f":red_square: 地图订阅 ({args[0]}) 删除失败，可能是地图名出错。")
+
         else:
             await msg.reply("用法：\n`/query ip [ip地址:端口号]` - 查询特定IP的服务器信息\n"
                             "`/query server` - 查询当前频道配置好的服务器信息\n"
@@ -69,6 +114,8 @@ def reg_query_cmd(bot: Bot):
 
 
 async def query_batch(msg: Message):
+    if not isinstance(msg, PublicMessage):
+        return
     cmd_query_logger.logging_msg(msg)
     try:
         current_channel_id = msg.ctx.channel.id

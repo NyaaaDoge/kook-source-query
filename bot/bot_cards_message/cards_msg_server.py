@@ -30,7 +30,7 @@ def query_server_result_card_msg(server_info: Union[SourceInfo, GoldSrcInfo],
         server_ping = f"{round(server_info.ping * 1000)} ms"
     else:
         server_ping = "N/A"
-    card.append(Module.Header(f"{server_info.game} 服务器查询"))
+    card.append(Module.Header(f"{server_info.game}"))
     card.append(Module.Divider())
     server_desc = f"(ins)**{server_info.server_name}**(ins)\n" \
                   f"地图：{server_info.map_name}\n" \
