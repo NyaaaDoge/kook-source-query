@@ -41,7 +41,7 @@ def reg_basic_cmd(bot: Bot):
 [Github项目](https://github.com/NyaaaDoge/kook-source-query)
 [预览图片项目](https://newpage-community.github.io/csgo-map-images/)，目前预览图片只有CSGO部分社区地图预览图片。
 觉得不错的话在 [Github页面](https://github.com/NyaaaDoge/kook-source-query) 点个 star 吧！
-或者在 [爱发电](https://afdian.net/a/NyaaaDoge) 支持作者！
+或者在 [爱发电](https://afdian.net/a/NyaaaDoge) 支持开发者。
 """)
 
     @bot.command(name='admin')

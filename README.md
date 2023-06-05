@@ -36,6 +36,8 @@ Bot管理员命令：
 | `/admin track [ip:port]`   | 为Bot添加服务器监控列表    | `/admin track`可以查看当前Bot服务器监控配置信息 |
 | `/admin untrack [ip:port]` | 删除服务器监控列表中的特定地址  | /                                |
 
+Bot使用轮询的方式监测服务器信息，如果符合用户订阅地图名则向用户推送通知。
+
 ## 如何使用？
 
 ### 1. 部署与初始化
@@ -60,4 +62,4 @@ pip install -r requirements.txt
 * [csgo-map-images](https://github.com/NewPage-Community/csgo-map-images) - 机器人地图图片图床  
 
 觉得不错的话在 Github 点个 star 吧！  
-或者在 [爱发电](https://afdian.net/a/NyaaaDoge) 支持作者！  
+或者在 [爱发电](https://afdian.net/a/NyaaaDoge) 支持开发者。  

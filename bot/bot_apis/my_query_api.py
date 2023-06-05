@@ -35,11 +35,11 @@ class MyQueryApi(object):
 
             # 检查缓存中是否存在对应的查询结果
             if address in cache:
-                logger.info(f"Retrieving server info from cache: {ip_addr}")
+                logger.debug(f"Retrieving server info from cache: {ip_addr}")
                 return cache[address]
 
             try:
-                logger.info(f"Querying {ip_addr}...")
+                logger.debug(f"Querying {ip_addr}...")
                 server_info = await a2s.ainfo(address, timeout=timeout)
                 server_info.ip_and_port = ip_addr
 
