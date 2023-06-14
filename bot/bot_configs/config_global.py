@@ -1,8 +1,9 @@
+import logging
 from typing import List
 
 
 class GlobalSettings(object):
-    log_level: str = "INFO"
+    log_level = logging.INFO
     BOT_VERSION: str = 'v0.0.5'
 
     bot_guild_black_list: List[str] = []

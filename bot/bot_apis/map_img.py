@@ -31,6 +31,6 @@ def load_cached_map_list():
 
 def search_map(map_name, map_list):
     for map_data in map_list:
-        if map_data['name'] == map_name:
+        if map_data['name'].lower() == map_name.lower():
             return map_data
     return None

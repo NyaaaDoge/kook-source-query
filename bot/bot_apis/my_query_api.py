@@ -15,7 +15,8 @@ glob_config = config_global.settings
 glob_timeout = glob_config.source_server_query_timeout
 
 # 创建一个带有过期时间的缓存对象，设置过期时间为60秒，最大缓存条目数为200
-cache = TTLCache(maxsize=200, ttl=60)
+cache_server = TTLCache(maxsize=200, ttl=60)
+cache_player = TTLCache(maxsize=200, ttl=60)
 
 
 @dataclass()
@@ -34,9 +35,9 @@ class MyQueryApi(object):
             address = (spilt_res[0], int(spilt_res[1]))
 
             # 检查缓存中是否存在对应的查询结果
-            if address in cache:
+            if address in cache_server:
                 logger.debug(f"Retrieving server info from cache: {ip_addr}")
-                return cache[address]
+                return cache_server[address]
 
             try:
                 logger.debug(f"Querying {ip_addr}...")
@@ -44,10 +45,32 @@ class MyQueryApi(object):
                 server_info.ip_and_port = ip_addr
 
                 # 将查询结果添加到缓存中
-                cache[address] = server_info
+                cache_server[address] = server_info
                 logger.info(f"Successfully query {ip_addr}.")
                 return server_info
             except Exception as e:
-                logger.exception(e, exc_info=True)
+                logger.exception(f"{ip_addr} Exception: {e}", exc_info=True)
         else:
             logger.info(f"ip is invalid.")
+
+    @staticmethod
+    async def get_server_player_info(address, timeout=glob_timeout):
+        if BotUtils.validate_ip_port(address):
+            ip_addr = address
+            spilt_res = ip_addr.split(":")
+            address = (spilt_res[0], int(spilt_res[1]))
+
+            # 检查缓存中是否存在对应的查询结果
+            if address in cache_player:
+                logger.debug(f"Retrieving player info from cache: {ip_addr}")
+                return cache_player[address]
+
+            try:
+                logger.debug(f"Querying {ip_addr} player info...")
+                player_info = await a2s.aplayers(address, timeout=timeout)
+                # 将查询结果添加到缓存中
+                cache_player[address] = player_info
+                logger.info(f"Successfully query player info for {ip_addr}.")
+                return player_info
+            except Exception as e:
+                logger.exception(e)

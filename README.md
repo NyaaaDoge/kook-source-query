@@ -59,7 +59,7 @@ pip install -r requirements.txt
 
 * [python-a2s](https://github.com/Yepoleb/python-a2s) - 用于查询起源/金源服务器的库  
 * [khl.py](https://github.com/TWT233/khl.py) - Kook社区python机器人框架  
-* [csgo-map-images](https://github.com/NewPage-Community/csgo-map-images) - 机器人地图图片图床  
+* [csgo-map-images](https://github.com/NewPage-Community/csgo-map-images) - 机器人地图图片  
 
 觉得不错的话在 Github 点个 star 吧！  
 或者在 [爱发电](https://afdian.net/a/NyaaaDoge) 支持开发者。  

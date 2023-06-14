@@ -1,8 +1,10 @@
 import logging
 import time
+from datetime import timedelta
 from typing import Union
-from khl.card import CardMessage, Card, Module, Element, Types
+from khl.card import CardMessage, Card, Module, Element, Types, Struct
 from a2s.info import SourceInfo, GoldSrcInfo
+from a2s.players import Player
 from bot.bot_apis.map_img import load_cached_map_list, search_map
 from bot.bot_apis.my_query_api import QueryFailInfo
 from bot.bot_utils import utils_log
@@ -22,7 +24,9 @@ def query_server_result_card_msg(server_info: Union[SourceInfo, GoldSrcInfo],
         card_msg.append(card)
         return card_msg
     elif server_info is None:
-        card.append(Module.Section(Element.Text(f"查询失败\n请确认查询的服务器是起源或者金源游戏服务器。")))
+        card.append(Module.Section(Element.Text(f"**(font)查询失败(font)[warning]**\n"
+                                                f"请确认查询的服务器是起源或者金源游戏服务器。\n"
+                                                f"也有可能是服务器通信出错，无法查询，请稍后再试。")))
         card_msg.append(card)
         return card_msg
     server_player_info = f"{server_info.player_count} / {server_info.max_players}"
@@ -62,10 +66,11 @@ def query_server_results_batch_card_msg(server_info_list: list,
     card.append(Module.Divider())
     for server_info in server_info_list[:15]:
         if isinstance(server_info, QueryFailInfo):
-            card.append(Module.Section(Element.Text(f"{server_info.ip_and_port} 查询失败")))
+            card.append(Module.Section(Element.Text(f"**(font){server_info.ip_and_port} 查询失败(font)[warning]**")))
             continue
         elif server_info is None:
-            card.append(Module.Section(Element.Text(f"查询失败\n请确认查询的服务器是起源或者金源游戏服务器。")))
+            card.append(Module.Section(Element.Text(f"**(font)查询失败(font)[warning]**"
+                                                    f"\n请确认查询的服务器是起源或者金源游戏服务器。")))
         server_player_info = f"{server_info.player_count} / {server_info.max_players}"
         if isinstance(server_info.ping, float):
             server_ping = f"{round(server_info.ping * 1000)} ms"
@@ -92,4 +97,41 @@ def query_server_results_batch_card_msg(server_info_list: list,
     card.append(Module.Context(Element.Text(f"查询于 {time.strftime('%H:%M')}")))
     card_msg.append(card)
     logger.debug(f"Return card message for {server_info_list}")
+    return card_msg
+
+
+def query_server_player_list_card_msg(player_list: list[Player]):
+    logger.debug(f"Build card message for {player_list}")
+    card_msg = CardMessage()
+    card = Card(theme=Types.Theme.INFO)
+    card.append(Module.Header(f"服务器玩家列表查询结果"))
+    card.append(Module.Divider())
+    card.append(Module.Context(f"服务器玩家数量：{len(player_list)}"))
+    if not any(player_list):
+        card.append(Module.Section(Element.Text("该服务器没有任何玩家")))
+    player_desc = ""
+    for player in player_list:
+        # if not any(player.name):
+        #     continue
+        player_name_desc = rf"{player.name}"
+        player_score_desc = f"{player.score}"
+        duration = timedelta(seconds=player.duration)
+        days = duration.days
+        hours = duration.seconds // 3600
+        minutes = (duration.seconds % 3600) // 60
+        seconds = duration.seconds % 60
+        if days > 0:
+            time_desc = f"{days}天 {hours}时 {minutes}分 {seconds}秒"
+        elif hours > 0:
+            time_desc = f"{hours}时 {minutes}分 {seconds}秒"
+        elif minutes > 0:
+            time_desc = f"{minutes}分 {seconds}秒"
+        else:
+            time_desc = f"{seconds}秒"
+        player_duration_desc = f"{time_desc}"
+        player_desc += f"{player_name_desc}\n"
+    card.append(Module.Section(Element.Text(player_desc)))
+    card.append(Module.Context(Element.Text(f"查询于 {time.strftime('%H:%M')}")))
+    card_msg.append(card)
+    logger.debug(f"Return card message for {player_list}")
     return card_msg

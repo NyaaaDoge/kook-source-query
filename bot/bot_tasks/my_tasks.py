@@ -15,7 +15,7 @@ task_logger = BotLogger(logger)
 
 def register_tasks(bot: Bot):
     # 更新地图图片列表
-    @bot.task.add_interval(hours=3)
+    @bot.task.add_interval(hours=6)
     async def update_map_img_list():
         try:
             await task_update_map_list_json()
@@ -73,7 +73,7 @@ async def task_track_server_map_info(bot: Bot):
             sub_sql.update_track_info_by_ip_and_port(server.ip_and_port,
                                                      query_info.map_name)
             # 如果当前查询的地图与上次推送的地图名一致，认为当前服务器仍在该会话中，直接跳过推送
-            if query_info.map_name == db_track_info.last_map_name:
+            if query_info.map_name.lower() == db_track_info.last_map_name.lower():
                 continue
             notify_user_list = user_sub_sql.get_user_list_by_sub_map(query_info.map_name)
             # 无用户订阅地图跳过
@@ -84,6 +84,7 @@ async def task_track_server_map_info(bot: Bot):
                 try:
                     # 获取要私信的用户
                     user = await bot.client.fetch_user(db_user_info.user_id)
+                    logger.info(f"Notify {user.id} for {query_info.map_name}.")
                     try:
                         # 首次私信通知发送图片
                         card_msg = query_server_result_card_msg(query_info, show_ip=True)

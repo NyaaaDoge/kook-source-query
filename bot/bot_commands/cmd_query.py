@@ -4,7 +4,7 @@ from bot.bot_utils import utils_log
 from bot.bot_apis.my_query_api import MyQueryApi, QueryFailInfo
 from bot.bot_configs import config_global
 from khl import Bot, Message, MessageTypes, HTTPRequester, PublicMessage
-from bot.bot_cards_message.cards_msg_server import query_server_result_card_msg, query_server_results_batch_card_msg
+from bot.bot_cards_message.cards_msg_server import query_server_result_card_msg, query_server_results_batch_card_msg, query_server_player_list_card_msg
 from bot.bot_utils.utils_bot import BotUtils
 from bot.bot_utils import sqlite3_channel, sqlite3_submap
 
@@ -63,6 +63,7 @@ def reg_query_cmd(bot: Bot):
             await query_batch(msg)
 
         elif command in ['sub']:
+            # TODO 需要将用户输入的kmd等字符串处理掉
             if not any(args):
                 user_sub_sql = sqlite3_submap.KookUserSubSql()
                 user_sub_info_list = user_sub_sql.get_all_user_sub_map_by_user_id(msg.author_id)
@@ -104,6 +105,18 @@ def reg_query_cmd(bot: Bot):
                     await msg.reply(f":green_square: 地图订阅 ({args[0]}) 删除成功")
                 else:
                     await msg.reply(f":red_square: 地图订阅 ({args[0]}) 删除失败，可能是地图名出错。")
+
+        elif command in ['player']:
+            if len(args) == 1:
+                if BotUtils.validate_ip_port(args[0]):
+                    ip_addr = args[0]
+                    try:
+                        player_info = await MyQueryApi.get_server_player_info(ip_addr)
+                        card_msg = query_server_player_list_card_msg(player_info)
+                        await msg.reply(type=MessageTypes.CARD, content=card_msg)
+                    except Exception as e:
+                        await msg.reply("查询失败，可能是服务器未返回玩家列表信息")
+                        logger.exception(e)
 
         else:
             await msg.reply("用法：\n`/query ip [ip地址:端口号]` - 查询特定IP的服务器信息\n"
