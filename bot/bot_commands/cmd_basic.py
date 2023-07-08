@@ -1,5 +1,6 @@
 import logging
 
+from bot.bot_cards_message.cards_msg_server import help_card_msg
 from bot.bot_apis.my_query_api import MyQueryApi
 from bot.bot_configs import config_global
 from bot.bot_utils import sqlite3_channel, sqlite3_submap
@@ -26,23 +27,7 @@ def reg_basic_cmd(bot: Bot):
         if not isinstance(msg, PublicMessage):
             return
         cmd_logger.logging_msg(msg)
-        await msg.reply(f"""Sauce Query Bot{global_settings.BOT_VERSION} 帮助文档：
-`/query ip [ip地址:端口号]` - 查询特定IP地址的起源/金源服务器信息
-`/query server` - 查询该频道设置好的IP地址列表的服务器信息
-`/query sub [map_name]` - 订阅特定地图，Bot监测到设定好的服务器有特定地图将会私信通知。
-`/query unsub [map_name]` - 取消订阅特定地图。
-`/config query [ip地址:端口号]` - 为当前频道设置添加要查询的IP地址
-`/config delete [ip地址:端口号]` - 删除设置里面当前频道对应的IP地址
-`/config showip [on/off]` - 为当前频道的查询设置显示/关闭IP地址结果
-`/config showimg [on/off]` - 为当前频道的查询设置显示/关闭预览图片，关闭图片后可以有效提高查询速度。
-`/config` - 查看当前频道查询的设置信息和当前服务器的设置信息
-一个服务器最多设置30个IP地址查询，一个频道最多设置15个IP地址查询。如有更多需求请自行前往Github获取源码自行部署。
-小技巧：只要在频道发送消息里面有关键字“查”并且@机器人即可查询服务器信息。功能同`/query server`。如`@机器人 查`
-[Github项目](https://github.com/NyaaaDoge/kook-source-query)
-[预览图片项目](https://newpage-community.github.io/csgo-map-images/)，目前预览图片只有CSGO部分社区地图预览图片。
-觉得不错的话在 [Github页面](https://github.com/NyaaaDoge/kook-source-query) 点个 star 吧！
-或者在 [爱发电](https://afdian.net/a/NyaaaDoge) 支持开发者。
-""")
+        await msg.reply(content=help_card_msg(), type=MessageTypes.CARD)
 
     @bot.command(name='admin')
     async def admin(msg: Message, command: str = None, *args):

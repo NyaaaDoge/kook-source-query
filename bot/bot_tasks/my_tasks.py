@@ -11,6 +11,7 @@ bot_settings = config_bot.settings
 glob_settings = config_global.settings
 logger = logging.getLogger(__name__)
 task_logger = BotLogger(logger)
+task_logger.create_log_file_by_rotate_handler("bot_tasks.log")
 
 
 def register_tasks(bot: Bot):

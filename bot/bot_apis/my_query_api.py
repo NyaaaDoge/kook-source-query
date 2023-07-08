@@ -10,7 +10,7 @@ from dataclasses import dataclass
 
 logger = logging.getLogger(__name__)
 api_query_logger = utils_log.BotLogger(logger)
-api_query_logger.create_log_file("api_query.log")
+api_query_logger.create_log_file_by_rotate_handler("api_query.log")
 glob_config = config_global.settings
 glob_timeout = glob_config.source_server_query_timeout
 
@@ -73,4 +73,4 @@ class MyQueryApi(object):
                 logger.info(f"Successfully query player info for {ip_addr}.")
                 return player_info
             except Exception as e:
-                logger.exception(e)
+                logger.exception(f"{ip_addr} Exception: {e}", exc_info=True)

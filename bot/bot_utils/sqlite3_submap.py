@@ -92,6 +92,18 @@ class KookUserSubSql(object):
         except Exception as e:
             logger.exception(e, exc_info=True)
 
+    def delete_user_all_sub_map_by_user_id(self, user_id: str):
+        try:
+            logger.debug(f"Deleting all rows by {user_id}...")
+            with self.conn() as conn:
+                result = conn.execute(f"delete from user_sub where user_id = ?",
+                                      (user_id,))
+                conn.commit()
+                conn.execute(f"VACUUM")
+                return result.rowcount
+        except Exception as e:
+            logger.exception(e, exc_info=True)
+
     def get_user_list_by_sub_map(self, sub_map_name: str):
         try:
             logger.debug(f"Query info by{sub_map_name}.")

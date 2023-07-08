@@ -2,6 +2,8 @@ import logging
 import os
 
 from logging import Logger
+from logging.handlers import TimedRotatingFileHandler
+
 from khl import Message, Event
 
 
@@ -52,3 +54,23 @@ class BotLogger(object):
         self.logger.addHandler(fh)
 
         return self.logger
+
+    def create_log_file_by_rotate_handler(self, filename: str):
+        filename = './logs/' + filename
+        try:
+            # 尝试创建 RotatingFileHandler
+            fh = TimedRotatingFileHandler(filename, when='D', interval=1, backupCount=7)
+            # 设置日志文件的命名规则，按天切分日志文件
+            # 'when'参数可以是 'S'、'M'、'H'、'D'、'W0'-'W6'，分别表示秒、分钟、小时、天、周一到周日切分
+            # 'interval'参数表示切分的时间间隔
+            # 'backupCount'参数表示保留的日志文件的最大数量
+
+        except OSError:
+            os.makedirs(os.path.dirname(filename))
+            # 再次尝试创建 RotatingFileHandler
+            fh = TimedRotatingFileHandler(filename, when='D', interval=1, backupCount=7)
+
+        fh.setLevel(logging.INFO)
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s -%(message)s')
+        fh.setFormatter(formatter)
+        self.logger.addHandler(fh)
