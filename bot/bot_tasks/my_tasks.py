@@ -31,14 +31,14 @@ def register_tasks(bot: Bot):
         except Exception as e:
             logger.exception(e)
 
-    # 向bm通信
-    if any(bot_settings.bot_market_uuid):
-        @bot.task.add_interval(minutes=30)
-        async def botmarketOnline():
-            botmarket_api = "http://bot.gekj.net/api/v1/online.bot"
-            headers = {'uuid': bot_settings.bot_market_uuid}
-            async with aiohttp.ClientSession() as session:
-                await session.get(botmarket_api, headers=headers)
+    # 向bm通信 TODO DEPRECATED bm已弃用
+    # if any(bot_settings.bot_market_uuid):
+    #     @bot.task.add_interval(minutes=30)
+    #     async def botmarketOnline():
+    #         botmarket_api = "http://bot.gekj.net/api/v1/online.bot"
+    #         headers = {'uuid': bot_settings.bot_market_uuid}
+    #         async with aiohttp.ClientSession() as session:
+    #             await session.get(botmarket_api, headers=headers)
 
 
 async def task_update_map_list_json():
@@ -81,6 +81,7 @@ async def task_track_server_map_info(bot: Bot):
             if not any(notify_user_list):
                 continue
             for user_info in notify_user_list:
+                # TODO 为其添加正则表达式匹配
                 db_user_info = sqlite3_submap.DatabaseUserSub(*user_info)
                 try:
                     # 获取要私信的用户

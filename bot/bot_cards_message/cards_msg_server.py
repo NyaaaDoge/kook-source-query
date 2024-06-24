@@ -2,7 +2,7 @@ import logging
 import time
 from datetime import timedelta
 from typing import Union
-from khl.card import CardMessage, Card, Module, Element, Types, Struct
+from khl.card import CardMessage, Card, Module, Element, Types
 from a2s.info import SourceInfo, GoldSrcInfo
 from a2s.players import Player
 from bot.bot_apis.map_img import load_cached_map_list, search_map
@@ -13,6 +13,9 @@ from bot.bot_utils import utils_log
 global_settings = config_global.settings
 logger = logging.getLogger(__name__)
 card_logger = utils_log.BotLogger(logger)
+POPULARITY_VERY_HOT_RATIO = 0.85
+POPULARITY_HOT_RATIO = 0.65
+POPULARITY_WARM_RATIO = 0.45
 
 
 def help_card_msg():
@@ -46,7 +49,7 @@ def help_card_msg():
 
 
 def query_server_result_card_msg(server_info: Union[SourceInfo, GoldSrcInfo],
-                                 map_img=True, show_ip=False) -> CardMessage:
+                                 map_img=True, show_ip=False, show_keywords=False) -> CardMessage:
     logger.debug(f"Build card message for{server_info}")
     map_list = load_cached_map_list()
     card_msg = CardMessage()
@@ -62,19 +65,33 @@ def query_server_result_card_msg(server_info: Union[SourceInfo, GoldSrcInfo],
         card_msg.append(card)
         return card_msg
     server_player_info = f"{server_info.player_count} / {server_info.max_players}"
+    try:
+        popular_ratio = server_info.player_count / server_info.max_players
+    except ZeroDivisionError:
+        popular_ratio = 0
+    popularity_indicator = ""
+    if popular_ratio >= POPULARITY_VERY_HOT_RATIO:
+        popularity_indicator = ":fire::fire::fire: "
+        server_player_info = f"(font){server_player_info}(font)[warning]"
+    elif popular_ratio >= POPULARITY_HOT_RATIO:
+        popularity_indicator = ":fire::fire: "
+        server_player_info = f"(font){server_player_info}(font)[pink]"
+    elif popular_ratio >= POPULARITY_WARM_RATIO:
+        popularity_indicator = ":fire: "
+        server_player_info = f"(font){server_player_info}(font)[success]"
     if isinstance(server_info.ping, float):
         server_ping = f"{round(server_info.ping * 1000)} ms"
     else:
         server_ping = "N/A"
-    card.append(Module.Header(f"{server_info.game}"))
+    card.append(Module.Header(f"{popularity_indicator}{server_info.server_name}"))
     card.append(Module.Divider())
-    server_desc = f"(ins)**{server_info.server_name}**(ins)\n" \
+    server_desc = f"(ins)**{server_info.game}**(ins)\n" \
                   f"地图：{server_info.map_name}\n" \
                   f"玩家：{server_player_info}  延迟：{server_ping}"
     if server_info.password_protected:
         server_desc += " :lock:"
     if show_ip:
-        server_desc += f"\n{server_info.ip_and_port}"
+        server_desc += f"\n{server_info.__getattribute__('ip_and_port')}"
     card.append(Module.Section(Element.Text(server_desc)))
     if map_img:
         # 地图图片预览项目地址 https://github.com/NewPage-Community/csgo-map-images
@@ -82,7 +99,20 @@ def query_server_result_card_msg(server_info: Union[SourceInfo, GoldSrcInfo],
         if search_result:
             img_src = search_result['medium']
             card.append(Module.Container(Element.Image(src=img_src, circle=False, size=Types.Size.LG)))
-    card.append(Module.Context(Element.Text(f"查询于 {time.strftime('%H:%M')}")))
+    end_desc = f"查询于 {time.strftime('%H:%M')}"
+    if server_info.version:
+        end_desc += f" 版本号 {server_info.version}"
+    if server_info.platform:
+        end_desc += f" 平台 "
+        if server_info.platform == 'l':
+            end_desc += f"Linux"
+        elif server_info.platform == 'w':
+            end_desc += f"Windows"
+        else:
+            end_desc += f"{server_info.platform}"
+    if show_keywords and server_info.keywords:
+        end_desc += f"\n*{','.join(server_info.keywords.split(','))}*"
+    card.append(Module.Context(Element.Text(end_desc, type=Types.Text.KMD)))
     card_msg.append(card)
     logger.debug(f"Return card message for {server_info}")
     return card_msg
@@ -104,11 +134,25 @@ def query_server_results_batch_card_msg(server_info_list: list,
             card.append(Module.Section(Element.Text(f"**(font)查询失败(font)[warning]**"
                                                     f"\n请确认查询的服务器是起源或者金源游戏服务器。")))
         server_player_info = f"{server_info.player_count} / {server_info.max_players}"
+        try:
+            popular_ratio = server_info.player_count / server_info.max_players
+        except ZeroDivisionError:
+            popular_ratio = 0
+        popularity_indicator = ""
+        if popular_ratio >= POPULARITY_VERY_HOT_RATIO:
+            popularity_indicator = ":fire::fire::fire: "
+            server_player_info = f"(font){server_player_info}(font)[warning]"
+        elif popular_ratio >= POPULARITY_HOT_RATIO:
+            popularity_indicator = ":fire::fire: "
+            server_player_info = f"(font){server_player_info}(font)[pink]"
+        elif popular_ratio >= POPULARITY_WARM_RATIO:
+            popularity_indicator = ":fire: "
+            server_player_info = f"(font){server_player_info}(font)[success]"
         if isinstance(server_info.ping, float):
             server_ping = f"{round(server_info.ping * 1000)} ms"
         else:
             server_ping = "N/A"
-        server_desc = f"(ins)**{server_info.server_name}**(ins)\n" \
+        server_desc = f"(ins)**{popularity_indicator}{server_info.server_name}**(ins)\n" \
                       f"地图：{server_info.map_name}\n" \
                       f"玩家：{server_player_info}  延迟：{server_ping}"
         if server_info.password_protected:

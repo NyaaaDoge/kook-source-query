@@ -1,10 +1,13 @@
 import logging
+import re
+
 from khl.command import Rule
 from bot.bot_utils import utils_log
 from bot.bot_apis.my_query_api import MyQueryApi, QueryFailInfo
 from bot.bot_configs import config_global
 from khl import Bot, Message, MessageTypes, HTTPRequester, PublicMessage
-from bot.bot_cards_message.cards_msg_server import query_server_result_card_msg, query_server_results_batch_card_msg, query_server_player_list_card_msg
+from bot.bot_cards_message.cards_msg_server import query_server_result_card_msg, query_server_results_batch_card_msg, \
+    query_server_player_list_card_msg
 from bot.bot_utils.utils_bot import BotUtils
 from bot.bot_utils import sqlite3_channel
 
@@ -35,25 +38,7 @@ def reg_query_cmd(bot: Bot):
             elif len(args) == 1:
                 if BotUtils.validate_ip_port(args[0]):
                     ip_addr = args[0]
-                    try:
-                        timeout_glob = global_settings.source_server_query_timeout
-                        server_info = await MyQueryApi().get_server_info(ip_addr, timeout=timeout_glob)
-                        try:
-                            # 首次发送先尝试发送图片
-                            card_msg = query_server_result_card_msg(server_info, map_img=True)
-                            await msg.reply(type=MessageTypes.CARD, content=card_msg)
-                        except HTTPRequester.APIRequestFailed as failed:
-                            try:
-                                logger.info(f"Failed to send map img. Sending info without img...")
-                                # 如果遇到 40000 代码再创建不发送图片的任务。如果是卡片消息创建失败，首先尝试发送没有图片的卡片消息。
-                                if failed.err_code == 40000:
-                                    card_msg = query_server_result_card_msg(server_info, map_img=False)
-                                    await msg.reply(type=MessageTypes.CARD, content=card_msg)
-                            except Exception as e:
-                                logger.exception(f"exception {e}")
-                    except Exception as e:
-                        logger.exception(f"exception {e}")
-                        await msg.reply(f"出现了一些问题，可能是服务器通信错误，也可能是IP地址有误，请稍后再试。")
+                    await query_single_ip(msg, ip_addr)
                 else:
                     await msg.reply("请输入要查询的服务器地址，包括端口号，您可能遗漏了端口号。正确格式：[ip地址:端口号]")
 
@@ -80,6 +65,19 @@ def reg_query_cmd(bot: Bot):
     @bot.command(regex=r".*查.*", rules=[Rule.is_bot_mentioned(bot)])
     async def query_batch_cmd(msg: Message):
         await query_batch(msg)
+
+    @bot.command(regex="connect .*")
+    async def connect_query_cmd(msg: Message):
+        # 消息connect xxx:xxx会触发该指令
+        pattern = r"connect ((?:\d{1,3}\.){3}\d{1,3}|[a-zA-Z0-9-]+\.[a-zA-Z0-9.-]+):(\d+)"
+        match = re.search(pattern, msg.content)
+        if not match:
+            logger.info("failed to match ip and address")
+            return
+        address = match.group(1)
+        port = match.group(2)
+        ip_addr = f"{address}:{port}"
+        await query_single_ip(msg, ip_addr)
 
 
 async def query_batch(msg: Message):
@@ -131,3 +129,25 @@ async def query_batch(msg: Message):
     except Exception as e:
         logger.exception(f"exception {e}")
         await msg.reply(f"出现了一些问题，请稍后再试，或联系开发者。")
+
+
+async def query_single_ip(msg: Message, ip_addr: str):
+    try:
+        timeout_glob = global_settings.source_server_query_timeout
+        server_info = await MyQueryApi().get_server_info(ip_addr, timeout=timeout_glob)
+        try:
+            # 首次发送先尝试发送图片
+            card_msg = query_server_result_card_msg(server_info, map_img=True)
+            await msg.reply(type=MessageTypes.CARD, content=card_msg)
+        except HTTPRequester.APIRequestFailed as failed:
+            try:
+                logger.info(f"Failed to send map img. Sending info without img...")
+                # 如果遇到 40000 代码再创建不发送图片的任务。如果是卡片消息创建失败，首先尝试发送没有图片的卡片消息。
+                if failed.err_code == 40000:
+                    card_msg = query_server_result_card_msg(server_info, map_img=False)
+                    await msg.reply(type=MessageTypes.CARD, content=card_msg)
+            except Exception as e:
+                logger.exception(f"exception {e}")
+    except Exception as e:
+        logger.exception(f"exception {e}")
+        await msg.reply(f"出现了一些问题，可能是服务器通信错误，也可能是IP地址有误，请稍后再试。")
