@@ -2,7 +2,7 @@ import logging
 import time
 from datetime import timedelta
 from typing import Union
-from khl.card import CardMessage, Card, Module, Element, Types, Struct
+from khl.card import CardMessage, Card, Module, Element, Types
 from a2s.info import SourceInfo, GoldSrcInfo
 from a2s.players import Player
 from bot.bot_apis.map_img import load_cached_map_list, search_map
@@ -111,7 +111,7 @@ def query_server_result_card_msg(server_info: Union[SourceInfo, GoldSrcInfo],
         else:
             end_desc += f"{server_info.platform}"
     if show_keywords and server_info.keywords:
-        end_desc += f"\n*{','.join(server_info.keywords.split(','))}*"
+        end_desc += f"\n*{server_info.keywords}*"
     card.append(Module.Context(Element.Text(end_desc, type=Types.Text.KMD)))
     card_msg.append(card)
     logger.debug(f"Return card message for {server_info}")
@@ -191,26 +191,27 @@ def query_server_player_list_card_msg(server_info: Union[SourceInfo, GoldSrcInfo
         card.append(Module.Section(Element.Text("该服务器没有任何玩家")))
         card_msg.append(card)
         return card_msg
-    player_desc = ""
+    player_desc = "(ins)**  游玩时长  |  玩家名称**(ins)\n"
     for player in player_list:
         if not player.name:
             player.name = "Player"
         player_name_desc = rf"{player.name}"
         duration = timedelta(seconds=player.duration)
-        days = duration.days
-        hours = duration.seconds // 3600
-        minutes = (duration.seconds % 3600) // 60
-        seconds = duration.seconds % 60
-        if days > 0:
-            time_desc = f"{days}天 {hours}时 {minutes}分 {seconds}秒"
-        elif hours > 0:
-            time_desc = f"{hours}时 {minutes}分 {seconds}秒"
-        elif minutes > 0:
+        # days = f"{duration.days}"
+        # hours = f"{duration.seconds // 3600:02}"
+        hours = f"{duration.days * 24 + duration.seconds // 3600:02}"
+        minutes = f"{(duration.seconds % 3600) // 60:02}"
+        seconds = f"{duration.seconds % 60:02}"
+        # if int(days) > 0:
+        #     time_desc = f"{days}天 {hours}时 {minutes}分"
+        if int(hours) > 0:
+            time_desc = f"{hours}时 {minutes}分"
+        elif int(minutes) > 0:
             time_desc = f"{minutes}分 {seconds}秒"
         else:
-            time_desc = f"{seconds}秒"
+            time_desc = f"00分 {seconds}秒"
         player_duration_desc = f"{time_desc}"
-        player_desc += f"{player_name_desc}   |   {player_duration_desc}"
+        player_desc += f"{player_duration_desc}  |  {player_name_desc}"
         # if player.score:
         #     player_desc += f"  |  {player.score}"
         player_desc += "\n"
