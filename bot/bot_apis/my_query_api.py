@@ -10,7 +10,7 @@ from dataclasses import dataclass
 
 logger = logging.getLogger(__name__)
 api_query_logger = utils_log.BotLogger(logger)
-api_query_logger.create_log_file_by_rotate_handler("api_query.log")
+# api_query_logger.create_log_file_by_rotate_handler("api_query.log")
 glob_config = config_global.settings
 glob_timeout = glob_config.source_server_query_timeout
 
@@ -40,13 +40,13 @@ class MyQueryApi(object):
                 return cache_server[address]
 
             try:
-                logger.debug(f"Querying {ip_addr}...")
+                logger.debug(f"Querying {ip_addr}")
                 server_info = await a2s.ainfo(address, timeout=timeout)
                 server_info.ip_and_port = ip_addr
 
                 # 将查询结果添加到缓存中
                 cache_server[address] = server_info
-                logger.info(f"Successfully query {ip_addr}.")
+                logger.info(f"Successfully query {ip_addr}")
                 return server_info
             except Exception as e:
                 logger.exception(f"{ip_addr} Exception: {e}", exc_info=True)
@@ -70,7 +70,7 @@ class MyQueryApi(object):
                 player_info = await a2s.aplayers(address, timeout=timeout)
                 # 将查询结果添加到缓存中
                 cache_player[address] = player_info
-                logger.info(f"Successfully query player info for {ip_addr}.")
+                logger.info(f"Successfully query player info for {ip_addr}")
                 return player_info
             except Exception as e:
                 logger.exception(f"{ip_addr} Exception: {e}", exc_info=True)

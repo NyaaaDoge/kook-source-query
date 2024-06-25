@@ -19,19 +19,19 @@ def reg_basic_cmd(bot: Bot):
     async def cmd_hello(msg: Message):
         if not isinstance(msg, PublicMessage):
             return
-        cmd_logger.logging_msg(msg)
+        cmd_logger.logging_public_msg(msg)
         await msg.reply("有什么想查的服务器？")
 
     @bot.command(name="help", case_sensitive=False)
     async def cmd_help(msg: Message):
         if not isinstance(msg, PublicMessage):
             return
-        cmd_logger.logging_msg(msg)
+        cmd_logger.logging_public_msg(msg)
         await msg.reply(content=help_card_msg(), type=MessageTypes.CARD)
 
     @bot.command(name='admin')
     async def admin(msg: Message, command: str = None, *args):
-        cmd_logger.logging_msg(msg)
+        cmd_logger.logging_public_msg(msg)
         if msg.author.id in global_settings.bot_developer_list:
             try:
                 if command is None:

@@ -17,7 +17,7 @@ def reg_notify_cmd(bot: Bot):
     async def notify(msg: Message, command: str = None, *args):
         if not isinstance(msg, PublicMessage):
             return
-        cmd_notify_logger.logging_msg(msg)
+        cmd_notify_logger.logging_public_msg(msg)
 
         if not command:
             await msg.reply("`/notify map [完整地图名]` - 订阅特定地图。当管理员设置的监控服务器里面有你订阅的地图名时，Bot将私信通知您。\n"

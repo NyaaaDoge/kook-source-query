@@ -22,7 +22,7 @@ def reg_query_cmd(bot: Bot):
     async def query(msg: Message, command: str = None, *args):
         if not isinstance(msg, PublicMessage):
             return
-        cmd_query_logger.logging_msg(msg)
+        cmd_query_logger.logging_public_msg(msg)
         if not command:
             await msg.reply("用法：\n`/query ip [ip地址:端口号]` - 查询特定IP的起源/金源游戏服务器信息\n"
                             "`/query server` - 查询当前频道配置好的服务器信息。可以使用关键字“查”并且@机器人触发该指令。\n"
@@ -90,7 +90,7 @@ def reg_query_cmd(bot: Bot):
 async def query_batch(msg: Message):
     if not isinstance(msg, PublicMessage):
         return
-    cmd_query_logger.logging_msg(msg)
+    cmd_query_logger.logging_public_msg(msg)
     try:
         current_channel_id = msg.ctx.channel.id
         chan_sql = sqlite3_channel.KookChannelSql()

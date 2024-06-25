@@ -17,7 +17,7 @@ def reg_channel_cmd(bot: Bot):
     async def config(msg: Message, command: str = None, *args):
         if not isinstance(msg, PublicMessage):
             return
-        cmd_channel_logger.logging_msg(msg)
+        cmd_channel_logger.logging_public_msg(msg)
         current_channel_guild_id = msg.ctx.guild.id
         current_guild = await bot.client.fetch_guild(current_channel_guild_id)
         current_channel_id = msg.ctx.channel.id

@@ -1,5 +1,4 @@
 import logging
-import aiohttp
 from khl import Bot, MessageTypes, HTTPRequester
 from bot.bot_apis import map_img, my_query_api
 from bot.bot_utils.utils_log import BotLogger
@@ -11,7 +10,7 @@ bot_settings = config_bot.settings
 glob_settings = config_global.settings
 logger = logging.getLogger(__name__)
 task_logger = BotLogger(logger)
-task_logger.create_log_file_by_rotate_handler("bot_tasks.log")
+# task_logger.create_log_file_by_rotate_handler("bot_tasks.log")
 
 
 def register_tasks(bot: Bot):
@@ -31,7 +30,7 @@ def register_tasks(bot: Bot):
         except Exception as e:
             logger.exception(e)
 
-    # 向bm通信 TODO DEPRECATED bm已弃用
+    # 向bm通信 DEPRECATED bm已弃用
     # if any(bot_settings.bot_market_uuid):
     #     @bot.task.add_interval(minutes=30)
     #     async def botmarketOnline():

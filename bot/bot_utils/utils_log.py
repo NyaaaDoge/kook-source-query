@@ -11,7 +11,7 @@ class BotLogger(object):
     def __init__(self, logger: Logger):
         self.logger = logger
 
-    def logging_msg(self, msg: Message):
+    def logging_public_msg(self, msg: Message):
         """
         记录消息日志
         :param msg:
@@ -20,7 +20,7 @@ class BotLogger(object):
         self.logger.info(f"Message: G_id({msg.ctx.guild.id})-C_id({msg.ctx.channel.id}) - "
                          f"Au({msg.author_id})-({msg.author.username}#{msg.author.identify_num}) = {msg.content}")
 
-    def logging_event(self, event: Event):
+    def logging_normal_event(self, event: Event):
         """
         记录事件日志
         :param event:
