@@ -14,9 +14,9 @@ api_query_logger.create_log_file_by_rotate_handler("api_query.log")
 glob_config = config_global.settings
 glob_timeout = glob_config.source_server_query_timeout
 
-# 创建一个带有过期时间的缓存对象，设置过期时间为60秒，最大缓存条目数为200
-cache_server = TTLCache(maxsize=200, ttl=60)
-cache_player = TTLCache(maxsize=200, ttl=60)
+# 创建一个带有过期时间的缓存对象
+cache_server = TTLCache(maxsize=300, ttl=60)
+cache_player = TTLCache(maxsize=500, ttl=10)
 
 
 @dataclass()

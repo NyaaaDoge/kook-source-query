@@ -49,13 +49,7 @@ def reg_query_cmd(bot: Bot):
             if len(args) == 1:
                 if BotUtils.validate_ip_port(args[0]):
                     ip_addr = args[0]
-                    try:
-                        player_info = await MyQueryApi.get_server_player_info(ip_addr)
-                        card_msg = query_server_player_list_card_msg(player_info)
-                        await msg.reply(type=MessageTypes.CARD, content=card_msg)
-                    except Exception as e:
-                        await msg.reply("查询失败，可能是服务器未返回玩家列表信息")
-                        logger.exception(e)
+                    await query_player_list(msg, ip_addr)
 
         else:
             await msg.reply("用法：\n`/query ip [ip地址:端口号]` - 查询特定IP的服务器信息\n"
@@ -77,7 +71,20 @@ def reg_query_cmd(bot: Bot):
         address = match.group(1)
         port = match.group(2)
         ip_addr = f"{address}:{port}"
-        await query_single_ip(msg, ip_addr)
+        await query_single_ip(msg, ip_addr, True)
+
+    @bot.command(regex="player .*")
+    async def player_query_cmd(msg: Message):
+        # 消息player xxx:xxx会触发该指令
+        pattern = r"player ((?:\d{1,3}\.){3}\d{1,3}|[a-zA-Z0-9-]+\.[a-zA-Z0-9.-]+):(\d+)"
+        match = re.search(pattern, msg.content)
+        if not match:
+            logger.info("failed to match ip and address")
+            return
+        address = match.group(1)
+        port = match.group(2)
+        ip_addr = f"{address}:{port}"
+        await query_player_list(msg, ip_addr)
 
 
 async def query_batch(msg: Message):
@@ -131,23 +138,34 @@ async def query_batch(msg: Message):
         await msg.reply(f"出现了一些问题，请稍后再试，或联系开发者。")
 
 
-async def query_single_ip(msg: Message, ip_addr: str):
+async def query_single_ip(msg: Message, ip_addr: str, key_words: bool = False):
     try:
         timeout_glob = global_settings.source_server_query_timeout
         server_info = await MyQueryApi().get_server_info(ip_addr, timeout=timeout_glob)
         try:
             # 首次发送先尝试发送图片
-            card_msg = query_server_result_card_msg(server_info, map_img=True)
+            card_msg = query_server_result_card_msg(server_info, map_img=True, show_keywords=key_words)
             await msg.reply(type=MessageTypes.CARD, content=card_msg)
         except HTTPRequester.APIRequestFailed as failed:
             try:
                 logger.info(f"Failed to send map img. Sending info without img...")
                 # 如果遇到 40000 代码再创建不发送图片的任务。如果是卡片消息创建失败，首先尝试发送没有图片的卡片消息。
                 if failed.err_code == 40000:
-                    card_msg = query_server_result_card_msg(server_info, map_img=False)
+                    card_msg = query_server_result_card_msg(server_info, map_img=False, show_keywords=key_words)
                     await msg.reply(type=MessageTypes.CARD, content=card_msg)
             except Exception as e:
                 logger.exception(f"exception {e}")
     except Exception as e:
         logger.exception(f"exception {e}")
         await msg.reply(f"出现了一些问题，可能是服务器通信错误，也可能是IP地址有误，请稍后再试。")
+
+
+async def query_player_list(msg: Message, ip_addr: str):
+    try:
+        server_info = await MyQueryApi.get_server_info(ip_addr)
+        player_info = await MyQueryApi.get_server_player_info(ip_addr)
+        card_msg = query_server_player_list_card_msg(server_info, player_info)
+        await msg.reply(type=MessageTypes.CARD, content=card_msg)
+    except Exception as e:
+        await msg.reply("查询失败，可能是服务器未返回玩家列表信息")
+        logger.exception(e)

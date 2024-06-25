@@ -2,7 +2,7 @@ import logging
 import time
 from datetime import timedelta
 from typing import Union
-from khl.card import CardMessage, Card, Module, Element, Types
+from khl.card import CardMessage, Card, Module, Element, Types, Struct
 from a2s.info import SourceInfo, GoldSrcInfo
 from a2s.players import Player
 from bot.bot_apis.map_img import load_cached_map_list, search_map
@@ -176,21 +176,26 @@ def query_server_results_batch_card_msg(server_info_list: list,
     return card_msg
 
 
-def query_server_player_list_card_msg(player_list: list[Player]):
-    logger.debug(f"Build card message for {player_list}")
+def query_server_player_list_card_msg(server_info: Union[SourceInfo, GoldSrcInfo], player_list: list[Player]):
+    logger.debug(f"Build card message for {server_info},{player_list}")
     card_msg = CardMessage()
     card = Card(theme=Types.Theme.INFO)
-    card.append(Module.Header(f"服务器玩家列表查询结果"))
+    card.append(Module.Header(f"{server_info.server_name} 服务器玩家列表"))
     card.append(Module.Divider())
-    card.append(Module.Context(f"服务器玩家数量：{len(player_list)}"))
+    server_player_info = f"{server_info.player_count} / {server_info.max_players}"
+    server_desc = f"(ins)**{server_info.game}**(ins)\n" \
+                  f"*地图：{server_info.map_name}\n" \
+                  f"玩家：{server_player_info}*"
+    card.append(Module.Section(Element.Text(server_desc)))
     if not any(player_list):
         card.append(Module.Section(Element.Text("该服务器没有任何玩家")))
+        card_msg.append(card)
+        return card_msg
     player_desc = ""
     for player in player_list:
-        # if not any(player.name):
-        #     continue
+        if not player.name:
+            player.name = "Player"
         player_name_desc = rf"{player.name}"
-        player_score_desc = f"{player.score}"
         duration = timedelta(seconds=player.duration)
         days = duration.days
         hours = duration.seconds // 3600
@@ -205,9 +210,42 @@ def query_server_player_list_card_msg(player_list: list[Player]):
         else:
             time_desc = f"{seconds}秒"
         player_duration_desc = f"{time_desc}"
-        player_desc += f"{player_name_desc}\n"
+        player_desc += f"{player_name_desc}   |   {player_duration_desc}"
+        # if player.score:
+        #     player_desc += f"  |  {player.score}"
+        player_desc += "\n"
     card.append(Module.Section(Element.Text(player_desc)))
-    card.append(Module.Context(Element.Text(f"查询于 {time.strftime('%H:%M')}")))
+    end_desc = f"查询于 {time.strftime('%H:%M')}"
+    if server_info.version:
+        end_desc += f" 版本号 {server_info.version}"
+    card.append(Module.Context(Element.Text(end_desc)))
     card_msg.append(card)
     logger.debug(f"Return card message for {player_list}")
+    return card_msg
+
+
+def player_notify_map_list_card_msg(kook_id: str, map_list: list[str]):
+    logger.debug(f"Build card message for{map_list}")
+    card_msg = CardMessage()
+    card = Card(theme=Types.Theme.INFO)
+    card.append(Module.Header(f":scroll: 玩家地图订阅列表"))
+    card.append(Module.Divider())
+    card.append(Module.Context(Element.Text(f"(met){kook_id}(met) 订阅了 **{len(map_list)}** 张地图",
+                                            type=Types.Text.KMD)))
+    if len(map_list) == 0:
+        card.append(Module.Section(Element.Text("当前没有订阅任何地图")))
+        card_msg.append(card)
+        return card_msg
+    # 分组
+    chunk_size = 100
+    map_list_chunks = []
+    for index in range(0, len(map_list), chunk_size):
+        map_chunk = map_list[index: index + chunk_size]
+        map_list_chunks.append(map_chunk)
+    for chunk_list in map_list_chunks:
+        map_name_desc = ""
+        for map_name in chunk_list:
+            map_name_desc += f"{map_name}\n"
+        card.append(Module.Section(Element.Text(map_name_desc)))
+    card_msg.append(card)
     return card_msg
