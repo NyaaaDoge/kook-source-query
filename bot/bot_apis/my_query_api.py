@@ -49,7 +49,7 @@ class MyQueryApi(object):
                 return server_info
             except exceptions.TimeoutError:
                 logger.exception(f"Timeout {ip_addr}", exc_info=False)
-            except exceptions as e:
+            except Exception as e:
                 logger.exception(f"{ip_addr} Exception: {e}", exc_info=True)
         else:
             logger.info(f"ip is invalid.")
@@ -75,5 +75,5 @@ class MyQueryApi(object):
                 return player_info
             except exceptions.TimeoutError:
                 logger.exception(f"Timeout {ip_addr}", exc_info=False)
-            except exceptions as e:
+            except Exception as e:
                 logger.exception(f"{ip_addr} Exception: {e}", exc_info=True)
