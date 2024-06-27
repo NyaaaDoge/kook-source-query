@@ -167,5 +167,5 @@ async def query_player_list(msg: Message, ip_addr: str):
         card_msg = query_server_player_list_card_msg(server_info, player_info)
         await msg.reply(type=MessageTypes.CARD, content=card_msg)
     except Exception as e:
-        await msg.reply("查询失败，可能是服务器未返回玩家列表信息")
+        await msg.reply("查询失败，出现未知问题，请联系开发者解决")
         logger.exception(e)

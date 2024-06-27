@@ -25,7 +25,6 @@ class QueryFailInfo(object):
 
 
 class MyQueryApi(object):
-
     @staticmethod
     async def get_server_info(address, timeout=glob_timeout) \
             -> Union[SourceInfo, GoldSrcInfo]:

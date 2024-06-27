@@ -4,7 +4,7 @@ from typing import List
 
 class GlobalSettings(object):
     log_level = logging.INFO
-    BOT_VERSION: str = 'v0.1.0'
+    BOT_VERSION: str = 'v0.1.1'
 
     bot_guild_black_list: List[str] = []
     bot_developer_list: List[str] = [""]

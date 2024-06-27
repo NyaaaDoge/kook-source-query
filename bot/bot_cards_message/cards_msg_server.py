@@ -25,24 +25,26 @@ def help_card_msg():
     card.append(Module.Header(f"Sauce Query Bot 帮助文档"))
     card.append(Module.Context(f"版本: {global_settings.BOT_VERSION}"))
     card.append(Module.Divider())
-    help_str = f"""`/query ip [ip地址:端口号]` - 查询特定IP地址的起源/金源服务器信息
-`/query server` - 查询该频道设置好的IP地址列表的服务器信息
-`/notify map [map_name]` - 订阅特定地图，Bot监测到设定好的服务器（由bot管理员设置）有特定地图将会进行私信通知。
-`/notify unsub [map_name]` - 取消订阅特定地图
-`/notify list` - 查询当前订阅的地图列表
-`/notify wipe` - 清除当前订阅的地图列表
-`/config query [ip地址:端口号]` - 为当前频道设置添加要查询的IP地址
-`/config delete [ip地址:端口号]` - 删除设置里面当前频道对应的IP地址
-`/config showip [on/off]` - 为当前频道的查询设置显示/关闭IP地址结果
-`/config showimg [on/off]` - 为当前频道的查询设置显示/关闭预览图片，关闭图片后可以有效提高查询速度
-`/config` - 查看当前频道查询的设置信息和当前服务器的设置信息
-"""
+    help_str = f"`/query ip [ip地址:端口号]` - 查询特定IP地址的起源/金源服务器信息" \
+               "`/query server` - 查询该频道设置好的IP地址列表的服务器信息" \
+               "`/notify map [map_name]` - 订阅特定地图，Bot监测到设定好的服务器（由bot管理员设置）有特定地图将会进行私信通知。" \
+               "`/notify unsub [map_name]` - 取消订阅特定地图" \
+               "`/notify list` - 查询当前订阅的地图列表" \
+               "`/notify wipe` - 清除当前订阅的地图列表" \
+               "`/config query [ip地址:端口号]` - 为当前频道设置添加要查询的IP地址" \
+               "`/config delete [ip地址:端口号]` - 删除设置里面当前频道对应的IP地址" \
+               "`/config showip [on/off]` - 为当前频道的查询设置显示/关闭IP地址结果" \
+               "`/config showimg [on/off]` - 为当前频道的查询设置显示/关闭预览图片，关闭图片后可以有效提高查询速度" \
+               "`/config` - 查看当前频道查询的设置信息和当前服务器的设置信息"
     card.append(Module.Section(Element.Text(help_str)))
     card.append(Module.Divider())
-    bottom_str = """一个服务器最多设置30个IP地址查询，一个频道最多设置15个IP地址查询。如有更多需求请自行前往Github获取源码自行部署。
-小技巧：只要在频道发送消息里面有关键字“查”并且@机器人即可查询服务器信息。功能同`/query server`。如`@机器人 查`
-[本Github项目](https://github.com/NyaaaDoge/kook-source-query) 和 [预览图片项目](https://newpage-community.github.io/csgo-map-images/)，目前预览图片只有CSGO部分社区地图预览图片。
-觉得不错的话在 [Github页面](https://github.com/NyaaaDoge/kook-source-query) 点个 star 吧！或者在 [爱发电](https://afdian.net/a/NyaaaDoge) 支持开发者。"""
+    bottom_str = "一个服务器最多设置30个IP地址查询，一个频道最多设置15个IP地址查询。如有更多需求请自行前往Github获取源码自行部署。" \
+                 "小技巧：只要在频道发送消息里面有关键字“查”并且@机器人即可查询服务器信息。功能同`/query server`。如`@机器人 查`" \
+                 "[本Github项目](https://github.com/NyaaaDoge/kook-source-query) 和 " \
+                 "[预览图片项目](https://newpage-community.github.io/csgo-map-images/)，" \
+                 "目前预览图片只有CSGO部分社区地图预览图片。" \
+                 "觉得不错的话在 [Github页面](https://github.com/NyaaaDoge/kook-source-query) " \
+                 "点个 star 吧！或者在 [爱发电](https://afdian.net/a/NyaaaDoge) 支持开发者。"
     card.append(Module.Context(Element.Text(bottom_str)))
     card_msg.append(card)
     return card_msg
@@ -180,13 +182,17 @@ def query_server_player_list_card_msg(server_info: Union[SourceInfo, GoldSrcInfo
     logger.debug(f"Build card message for {server_info},{player_list}")
     card_msg = CardMessage()
     card = Card(theme=Types.Theme.INFO)
-    card.append(Module.Header(f"{server_info.server_name} 服务器玩家列表"))
+    if server_info is not None:
+        card.append(Module.Header(f"{server_info.server_name} 服务器玩家列表"))
+    else:
+        card.append(Module.Header(f"服务器玩家列表"))
     card.append(Module.Divider())
-    server_player_info = f"{server_info.player_count} / {server_info.max_players}"
-    server_desc = f"(ins)**{server_info.game}**(ins)\n" \
-                  f"*地图：{server_info.map_name}\n" \
-                  f"玩家：{server_player_info}*"
-    card.append(Module.Section(Element.Text(server_desc)))
+    if server_info is not None:
+        server_player_info = f"{server_info.player_count} / {server_info.max_players}"
+        server_desc = f"(ins)**{server_info.game}**(ins)\n" \
+                      f"*地图：{server_info.map_name}\n" \
+                      f"玩家：{server_player_info}*"
+        card.append(Module.Section(Element.Text(server_desc)))
     if not any(player_list):
         card.append(Module.Section(Element.Text("该服务器没有任何玩家")))
         card_msg.append(card)
