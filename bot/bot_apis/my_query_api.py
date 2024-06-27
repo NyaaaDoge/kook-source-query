@@ -1,5 +1,6 @@
 import logging
 import a2s
+from asyncio import exceptions
 from typing import Union
 from cachetools import TTLCache
 from bot.bot_configs import config_global
@@ -10,7 +11,6 @@ from dataclasses import dataclass
 
 logger = logging.getLogger(__name__)
 api_query_logger = utils_log.BotLogger(logger)
-# api_query_logger.create_log_file_by_rotate_handler("api_query.log")
 glob_config = config_global.settings
 glob_timeout = glob_config.source_server_query_timeout
 
@@ -47,7 +47,9 @@ class MyQueryApi(object):
                 cache_server[address] = server_info
                 logger.info(f"Successfully query {ip_addr}")
                 return server_info
-            except Exception as e:
+            except exceptions.TimeoutError:
+                logger.exception(f"Timeout {ip_addr}", exc_info=False)
+            except exceptions as e:
                 logger.exception(f"{ip_addr} Exception: {e}", exc_info=True)
         else:
             logger.info(f"ip is invalid.")
@@ -71,5 +73,7 @@ class MyQueryApi(object):
                 cache_player[address] = player_info
                 logger.info(f"Successfully query player info for {ip_addr}")
                 return player_info
-            except Exception as e:
+            except exceptions.TimeoutError:
+                logger.exception(f"Timeout {ip_addr}", exc_info=False)
+            except exceptions as e:
                 logger.exception(f"{ip_addr} Exception: {e}", exc_info=True)
