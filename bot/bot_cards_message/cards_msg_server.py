@@ -182,14 +182,12 @@ def query_server_player_list_card_msg(server_info: Union[SourceInfo, GoldSrcInfo
     logger.debug(f"Build card message for {server_info},{player_list}")
     card_msg = CardMessage()
     card = Card(theme=Types.Theme.INFO)
-    if server_info is not None:
-        card.append(Module.Header(f"{server_info.server_name} 服务器玩家列表"))
-    else:
-        card.append(Module.Header(f"服务器玩家列表"))
+    card.append(Module.Header(f"服务器玩家列表查询结果"))
     card.append(Module.Divider())
     if server_info is not None:
         server_player_info = f"{server_info.player_count} / {server_info.max_players}"
         server_desc = f"(ins)**{server_info.game}**(ins)\n" \
+                      f"{server_info.server_name}\n" \
                       f"*地图：{server_info.map_name}\n" \
                       f"玩家：{server_player_info}*"
         card.append(Module.Section(Element.Text(server_desc)))
