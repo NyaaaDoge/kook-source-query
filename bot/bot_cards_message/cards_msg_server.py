@@ -197,7 +197,7 @@ def query_server_player_list_card_msg(server_info: Union[SourceInfo, GoldSrcInfo
         card.append(Module.Section(Element.Text("该服务器没有任何玩家")))
         card_msg.append(card)
         return card_msg
-    player_desc = "(ins)**  游玩时长  |  玩家名称**(ins)\n"
+    player_desc = "  游玩时长  |  玩家名称\n"
     for player in player_list:
         if not player.name:
             player.name = "Player"
@@ -221,7 +221,7 @@ def query_server_player_list_card_msg(server_info: Union[SourceInfo, GoldSrcInfo
         # if player.score:
         #     player_desc += f"  |  {player.score}"
         player_desc += "\n"
-    card.append(Module.Section(Element.Text(player_desc)))
+    card.append(Module.Section(Element.Text(player_desc, type=Types.Text.PLAIN)))
     end_desc = f"查询于 {time.strftime('%H:%M')}"
     if server_info.version:
         end_desc += f" 版本号 {server_info.version}"
