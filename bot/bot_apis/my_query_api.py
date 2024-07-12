@@ -52,7 +52,7 @@ class MyQueryApi(object):
             spilt_res = ip_addr_and_port.split(":")
             ip_addr = spilt_res[0]
             ip_port = int(spilt_res[1])
-            address = ( ip_addr, ip_port)
+            address = (ip_addr, ip_port)
 
             # 检查缓存中是否存在对应的查询结果
             if address in cache_server:
@@ -68,7 +68,7 @@ class MyQueryApi(object):
                 # 只解析域名
                 if domain_match and dns_resolve:
                     domain = domain_match.group(0)
-                    res = await resolve_domain(domain,  rdtype="A")
+                    res = await resolve_domain(domain, rdtype="A")
                     if res:
                         ip_addresses = [rdata.to_text() for rdata in res]
                         server_info.resolved_ip_address = ip_addresses
