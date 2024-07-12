@@ -1,4 +1,5 @@
 import logging
+import re
 import time
 from datetime import timedelta
 from typing import Union
@@ -16,6 +17,36 @@ card_logger = utils_log.BotLogger(logger)
 POPULARITY_VERY_HOT_RATIO = 0.85
 POPULARITY_HOT_RATIO = 0.65
 POPULARITY_WARM_RATIO = 0.45
+
+
+STEAM_CONNECT_URL = f"https://gitee.com/link?target="
+
+
+def get_steam_connect_browser_protocol(ip_with_port, password=None, game_appid: int = None):
+    # steam://connect/<IP>[:<port>][/<password>] detect the game and connect the server. dns not work here
+    pattern = r'^((\d{1,3}\.){3}\d{1,3}):([0-9]{1,5})$'
+    match = re.match(pattern, ip_with_port)
+    if match:
+        # 验证每个数字部分在0到255之间
+        octets = match.group(1).split('.')
+        for octet in octets:
+            if not (0 <= int(octet) <= 255):
+                return False
+        # 验证端口在0到65535之间
+        port = int(match.group(3))
+        if 0 <= port <= 65535:
+            protocol = f"steam://connect/{ip_with_port}"
+            if password:
+                protocol += f"/{password}"
+            return protocol
+
+    # 如果指定appid
+    if game_appid:
+        if game_appid == 730:
+            protocol = f"steam://rungame/730/76561202255233023/+connect {ip_with_port}"
+            if password:
+                protocol += f"/{password}"
+            return protocol
 
 
 def help_card_msg():
@@ -51,7 +82,7 @@ def help_card_msg():
 
 
 def query_server_result_card_msg(server_info: Union[SourceInfo, GoldSrcInfo],
-                                 map_img=True, show_ip=False, show_keywords=False) -> CardMessage:
+                                 map_img=True, show_ip=True, show_keywords=False) -> CardMessage:
     logger.debug(f"Build card message for{server_info}")
     map_list = load_cached_map_list()
     card_msg = CardMessage()
@@ -93,7 +124,14 @@ def query_server_result_card_msg(server_info: Union[SourceInfo, GoldSrcInfo],
     if server_info.password_protected:
         server_desc += " :lock:"
     if show_ip:
-        server_desc += f"\n{server_info.__getattribute__('ip_and_port')}"
+        ip_port = server_info.__getattribute__('ip_and_port')
+        protocol = get_steam_connect_browser_protocol(ip_port)
+        if ip_addr_resolved := server_info.__getattribute__('resolved_ip_address'):
+            protocol = get_steam_connect_browser_protocol(f"{ip_addr_resolved[0]}:{server_info.port}")
+        if protocol:
+            server_desc += f"\n[{ip_port}]({STEAM_CONNECT_URL}{protocol})"
+        else:
+            server_desc += f"\n{ip_port}"
     card.append(Module.Section(Element.Text(server_desc)))
     if map_img:
         # 地图图片预览项目地址 https://github.com/NewPage-Community/csgo-map-images
@@ -160,7 +198,14 @@ def query_server_results_batch_card_msg(server_info_list: list,
         if server_info.password_protected:
             server_desc += " :lock:"
         if show_ip:
-            server_desc += f"\n{server_info.ip_and_port}"
+            ip_port = server_info.__getattribute__('ip_and_port')
+            protocol = get_steam_connect_browser_protocol(ip_port)
+            if ip_addr_resolved := server_info.__getattribute__('resolved_ip_address'):
+                protocol = get_steam_connect_browser_protocol(f"{ip_addr_resolved[0]}:{server_info.port}")
+            if protocol:
+                server_desc += f"\n[{ip_port}]({STEAM_CONNECT_URL}{protocol})"
+            else:
+                server_desc += f"\n{ip_port}"
         if map_img:
             # 地图图片预览项目地址 https://github.com/NewPage-Community/csgo-map-images
             search_result = search_map(server_info.map_name, map_list)

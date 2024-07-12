@@ -11,7 +11,6 @@ bot_settings = config_bot.settings
 glob_settings = config_global.settings
 logger = logging.getLogger(__name__)
 task_logger = BotLogger(logger)
-# task_logger.create_log_file_by_rotate_handler("bot_tasks.log")
 
 
 def register_tasks(bot: Bot):
@@ -92,7 +91,7 @@ async def update_server_and_get_notify_user(ip_addr):
     try:
         if ip_addr is None:
             return
-        query_info = await my_query_api.MyQueryApi.get_server_info(ip_addr)
+        query_info = await my_query_api.MyQueryApi.get_server_info(ip_addr, dns_resolve=True)
         if query_info is None:
             return
         sub_sql = sqlite3_submap.ServerTrackSql()
