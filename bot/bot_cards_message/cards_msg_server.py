@@ -3,7 +3,7 @@ import re
 import time
 from datetime import timedelta
 from typing import Union
-from khl.card import CardMessage, Card, Module, Element, Types
+from khl.card import CardMessage, Card, Module, Element, Types, Color
 from a2s.info import SourceInfo, GoldSrcInfo
 from a2s.players import Player
 from bot.bot_apis.map_img import load_cached_map_list, search_map
@@ -14,10 +14,12 @@ from bot.bot_utils import utils_log
 global_settings = config_global.settings
 logger = logging.getLogger(__name__)
 card_logger = utils_log.BotLogger(logger)
-POPULARITY_VERY_HOT_RATIO = 0.85
-POPULARITY_HOT_RATIO = 0.65
-POPULARITY_WARM_RATIO = 0.45
-
+POPULARITY_VERY_HOT_RATIO = 0.80
+POPULARITY_HOT_RATIO = 0.60
+POPULARITY_WARM_RATIO = 0.40
+VERY_HOT_COLOR = "#FF0000"
+HOT_COLOR = "#DF4736"
+WARM_COLOR = "#EC897d"
 
 STEAM_CONNECT_URL = f"https://gitee.com/link?target="
 
@@ -106,12 +108,15 @@ def query_server_result_card_msg(server_info: Union[SourceInfo, GoldSrcInfo],
     if popular_ratio >= POPULARITY_VERY_HOT_RATIO:
         popularity_indicator = ":fire::fire::fire: "
         server_player_info = f"(font){server_player_info}(font)[warning]"
+        card.color = Color(hex_color=VERY_HOT_COLOR)
     elif popular_ratio >= POPULARITY_HOT_RATIO:
         popularity_indicator = ":fire::fire: "
         server_player_info = f"(font){server_player_info}(font)[pink]"
+        card.color = Color(hex_color=HOT_COLOR)
     elif popular_ratio >= POPULARITY_WARM_RATIO:
         popularity_indicator = ":fire: "
         server_player_info = f"(font){server_player_info}(font)[success]"
+        card.color = Color(hex_color=WARM_COLOR)
     if isinstance(server_info.ping, float):
         server_ping = f"{round(server_info.ping * 1000)} ms"
     else:
