@@ -164,7 +164,7 @@ def query_server_result_card_msg(server_info: Union[SourceInfo, GoldSrcInfo],
 
 
 def query_server_results_batch_card_msg(server_info_list: list,
-                                        map_img=True, show_ip=False) -> CardMessage:
+                                        map_img=True, show_ip=True) -> CardMessage:
     logger.debug(f"Build card message for {server_info_list}")
     map_list = load_cached_map_list()
     card_msg = CardMessage()
