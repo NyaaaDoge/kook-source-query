@@ -20,7 +20,7 @@ glob_timeout = glob_config.source_server_query_timeout
 
 # 创建一个带有过期时间的缓存对象
 cache_dns = TTLCache(maxsize=300, ttl=6000)
-cache_server = TTLCache(maxsize=300, ttl=60)
+cache_server = TTLCache(maxsize=300, ttl=5)
 cache_player = TTLCache(maxsize=500, ttl=10)
 
 

@@ -171,7 +171,7 @@ def query_server_results_batch_card_msg(server_info_list: list,
     card = Card(theme=Types.Theme.INFO)
     card.append(Module.Header(f"服务器查询结果"))
     card.append(Module.Divider())
-    for server_info in server_info_list[:15]:
+    for server_info in server_info_list[:20]:
         if isinstance(server_info, QueryFailInfo):
             card.append(Module.Section(Element.Text(f"**(font){server_info.ip_and_port} 查询失败(font)[warning]**")))
             continue
@@ -185,13 +185,13 @@ def query_server_results_batch_card_msg(server_info_list: list,
             popular_ratio = 0
         popularity_indicator = ""
         if popular_ratio >= POPULARITY_VERY_HOT_RATIO:
-            popularity_indicator = ":fire::fire::fire: "
+            # popularity_indicator = ":fire::fire::fire: "
             server_player_info = f"(font){server_player_info}(font)[warning]"
         elif popular_ratio >= POPULARITY_HOT_RATIO:
-            popularity_indicator = ":fire::fire: "
+            # popularity_indicator = ":fire::fire: "
             server_player_info = f"(font){server_player_info}(font)[pink]"
         elif popular_ratio >= POPULARITY_WARM_RATIO:
-            popularity_indicator = ":fire: "
+            # popularity_indicator = ":fire: "
             server_player_info = f"(font){server_player_info}(font)[success]"
         if isinstance(server_info.ping, float):
             server_ping = f"{round(server_info.ping * 1000)} ms"
