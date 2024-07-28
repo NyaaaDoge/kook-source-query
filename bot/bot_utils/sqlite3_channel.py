@@ -72,7 +72,7 @@ class KookChannelSql(object):
                                   channel.name,
                                   insert_time,
                                   ip_addr,
-                                  0,
+                                  1,
                                   1)
                 conn.execute(f"insert into kook_channel values (NULL,?,?,?,?,?,?,?)", insert_content)
                 conn.commit()

@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import re
 
@@ -96,7 +97,7 @@ async def query_batch(msg: Message):
         chan_sql = sqlite3_channel.KookChannelSql()
         db_info = chan_sql.get_all_sub_ip_by_channel_id(current_channel_id)
         ip_to_query_list = []
-        server_info_list = []
+        # server_info_list = []
         show_ip_flag = False
         show_img_flag = True
         if db_info:
@@ -111,13 +112,22 @@ async def query_batch(msg: Message):
             await msg.reply(f"当前频道尚未配置任何IP地址，请使用`/config query [ip:端口]`进行配置添加。")
             return
         if any(ip_to_query_list):
-            for ip in ip_to_query_list:
-                timeout_glob = global_settings.source_server_query_timeout
-                server_info = await MyQueryApi().get_server_info(ip, timeout=timeout_glob)
-                if server_info:
-                    server_info_list.append(server_info)
-                else:
-                    server_info_list.append(QueryFailInfo(ip))
+            # TODO 使用异步并发执行所有查询
+            query_tasks_list = [MyQueryApi().get_server_info(ip, timeout=3) for ip in ip_to_query_list]
+            results = await asyncio.gather(*query_tasks_list)
+            # 处理查询结果
+            server_info_list = [
+                result if result else QueryFailInfo(ip)
+                for ip, result in zip(ip_to_query_list, results)
+            ]
+            #
+            # for ip in ip_to_query_list:
+            #     query_tasks_list.append(asyncio.create_task(MyQueryApi().get_server_info(ip, timeout=3)))
+            #     server_info = await MyQueryApi().get_server_info(ip, timeout=timeout_glob)
+            #     if server_info:
+            #         server_info_list.append(server_info)
+            #     else:
+            #         server_info_list.append(QueryFailInfo(ip))
             try:
                 # 使用多服务器卡片消息
                 card_msg = query_server_results_batch_card_msg(server_info_list, map_img=show_img_flag,
