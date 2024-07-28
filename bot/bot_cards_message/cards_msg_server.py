@@ -17,8 +17,8 @@ card_logger = utils_log.BotLogger(logger)
 POPULARITY_VERY_HOT_RATIO = 0.80
 POPULARITY_HOT_RATIO = 0.60
 POPULARITY_WARM_RATIO = 0.40
-VERY_HOT_COLOR = "#FF0000"
-HOT_COLOR = "#DF4736"
+VERY_HOT_COLOR = "#EB0006"
+HOT_COLOR = "#EA635A"
 WARM_COLOR = "#EC897d"
 
 STEAM_CONNECT_URL = f"https://gitee.com/link?target="
@@ -107,11 +107,11 @@ def query_server_result_card_msg(server_info: Union[SourceInfo, GoldSrcInfo],
     popularity_indicator = ""
     if popular_ratio >= POPULARITY_VERY_HOT_RATIO:
         popularity_indicator = ":fire::fire::fire: "
-        server_player_info = f"(font){server_player_info}(font)[warning]"
+        server_player_info = f"(font){server_player_info}(font)[danger]"
         card.color = Color(hex_color=VERY_HOT_COLOR)
     elif popular_ratio >= POPULARITY_HOT_RATIO:
         popularity_indicator = ":fire::fire: "
-        server_player_info = f"(font){server_player_info}(font)[pink]"
+        server_player_info = f"(font){server_player_info}(font)[warning]"
         card.color = Color(hex_color=HOT_COLOR)
     elif popular_ratio >= POPULARITY_WARM_RATIO:
         popularity_indicator = ":fire: "
@@ -171,12 +171,13 @@ def query_server_results_batch_card_msg(server_info_list: list,
     card = Card(theme=Types.Theme.INFO)
     card.append(Module.Header(f"服务器查询结果"))
     card.append(Module.Divider())
-    for server_info in server_info_list[:20]:
+    max_query_modules = 40
+    for server_info in server_info_list[:max_query_modules]:
         if isinstance(server_info, QueryFailInfo):
-            card.append(Module.Section(Element.Text(f"**(font){server_info.ip_and_port} 查询失败(font)[warning]**")))
+            card.append(Module.Section(Element.Text(f"(font){server_info.ip_and_port} 查询失败(font)[danger]")))
             continue
         elif server_info is None:
-            card.append(Module.Section(Element.Text(f"**(font)查询失败(font)[warning]**"
+            card.append(Module.Section(Element.Text(f"(font)查询失败(font)[danger]"
                                                     f"\n请确认查询的服务器是起源或者金源游戏服务器。")))
         server_player_info = f"{server_info.player_count} / {server_info.max_players}"
         try:
@@ -186,10 +187,10 @@ def query_server_results_batch_card_msg(server_info_list: list,
         popularity_indicator = ""
         if popular_ratio >= POPULARITY_VERY_HOT_RATIO:
             # popularity_indicator = ":fire::fire::fire: "
-            server_player_info = f"(font){server_player_info}(font)[warning]"
+            server_player_info = f"(font){server_player_info}(font)[danger]"
         elif popular_ratio >= POPULARITY_HOT_RATIO:
             # popularity_indicator = ":fire::fire: "
-            server_player_info = f"(font){server_player_info}(font)[pink]"
+            server_player_info = f"(font){server_player_info}(font)[warning]"
         elif popular_ratio >= POPULARITY_WARM_RATIO:
             # popularity_indicator = ":fire: "
             server_player_info = f"(font){server_player_info}(font)[success]"
@@ -197,9 +198,9 @@ def query_server_results_batch_card_msg(server_info_list: list,
             server_ping = f"{round(server_info.ping * 1000)} ms"
         else:
             server_ping = "N/A"
-        server_desc = f"(ins)**{popularity_indicator}{server_info.server_name}**(ins)\n" \
+        server_desc = f"> (ins)**{popularity_indicator}{server_info.server_name}**(ins)\n" \
                       f"地图：{server_info.map_name}\n" \
-                      f"玩家：{server_player_info}  延迟：{server_ping}"
+                      f"玩家：**{server_player_info}**  延迟：{server_ping}"
         if server_info.password_protected:
             server_desc += " :lock:"
         if show_ip:
@@ -208,9 +209,9 @@ def query_server_results_batch_card_msg(server_info_list: list,
             if ip_addr_resolved := server_info.__getattribute__('resolved_ip_address'):
                 protocol = get_steam_connect_browser_protocol(f"{ip_addr_resolved[0]}:{server_info.port}")
             if protocol:
-                server_desc += f"\n[{ip_port}]({STEAM_CONNECT_URL}{protocol})"
+                server_desc += f"\n**[{ip_port}]({STEAM_CONNECT_URL}{protocol})**"
             else:
-                server_desc += f"\n{ip_port}"
+                server_desc += f"\n**{ip_port}**"
         if map_img:
             # 地图图片预览项目地址 https://github.com/NewPage-Community/csgo-map-images
             search_result = search_map(server_info.map_name, map_list)
