@@ -17,6 +17,9 @@ card_logger = utils_log.BotLogger(logger)
 POPULARITY_VERY_HOT_RATIO = 0.80
 POPULARITY_HOT_RATIO = 0.60
 POPULARITY_WARM_RATIO = 0.40
+POP_VERY_HOT_INDICATOR = ":red_circle:"
+POP_HOT_INDICATOR = ":orange_circle:"
+POP_WARM_INDICATOR = ":yellow_circle:"
 VERY_HOT_COLOR = "#EB4B4B"
 HOT_COLOR = "#EB6969"
 WARM_COLOR = "#EB8787"
@@ -106,15 +109,15 @@ def query_server_result_card_msg(server_info: Union[SourceInfo, GoldSrcInfo],
         popular_ratio = 0
     popularity_indicator = ""
     if popular_ratio >= POPULARITY_VERY_HOT_RATIO:
-        popularity_indicator = ":fire::fire::fire: "
+        popularity_indicator = f"{POP_VERY_HOT_INDICATOR} "
         server_player_info = f"(font){server_player_info}(font)[danger]"
         card.color = Color(hex_color=VERY_HOT_COLOR)
     elif popular_ratio >= POPULARITY_HOT_RATIO:
-        popularity_indicator = ":fire::fire: "
+        popularity_indicator = f"{POP_HOT_INDICATOR} "
         server_player_info = f"(font){server_player_info}(font)[warning]"
         card.color = Color(hex_color=HOT_COLOR)
     elif popular_ratio >= POPULARITY_WARM_RATIO:
-        popularity_indicator = ":fire: "
+        popularity_indicator = f"{POP_WARM_INDICATOR} "
         server_player_info = f"(font){server_player_info}(font)[success]"
         card.color = Color(hex_color=WARM_COLOR)
     if isinstance(server_info.ping, float):
@@ -164,12 +167,14 @@ def query_server_result_card_msg(server_info: Union[SourceInfo, GoldSrcInfo],
 
 
 def query_server_results_batch_card_msg(server_info_list: list,
-                                        map_img=True, show_ip=True) -> CardMessage:
+                                        map_img=True, show_ip=True, header_desc: str = None) -> CardMessage:
     logger.debug(f"Build card message for {server_info_list}")
     map_list = load_cached_map_list()
     card_msg = CardMessage()
     card = Card(theme=Types.Theme.INFO)
-    card.append(Module.Header(f"服务器查询结果"))
+    if header_desc is None:
+        header_desc = "服务器查询结果"
+    card.append(Module.Header(header_desc))
     card.append(Module.Divider())
     max_query_modules = 40
     for server_info in server_info_list[:max_query_modules]:
